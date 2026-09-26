@@ -3,7 +3,7 @@ import { Check, X, Clock, Circle, Ban } from 'lucide-react'
 import type { MyRedemption } from '@/lib/api'
 import { formatIST } from '@/lib/date-utils'
 import { remainingLabel, statusTone } from '@/lib/reward-validity'
-import { markFor } from './rewardMarks'
+import { useCategoryMark } from './rewardMarks'
 import { ValueCoin } from './ValueCoin'
 import { dismissOnBackdrop } from '@/lib/backdrop'
 
@@ -157,8 +157,10 @@ export function RedemptionDetail({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  const categoryMark = useCategoryMark()
+
   const tone = statusTone(redemption.effective_status)
-  const mark = markFor(redemption.reward_category)
+  const mark = categoryMark(redemption.reward_category)
   const Mark = mark.icon
   const steps = buildSteps(redemption)
   const coins = coinOutcome(redemption)

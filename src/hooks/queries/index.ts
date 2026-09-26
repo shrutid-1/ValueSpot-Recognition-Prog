@@ -18,6 +18,8 @@ export {
   useSetProjectActive, useDeleteProject, useEligibleProjectManagers, useSelectableProjects,
   useEmployeeProject, useSetEmployeeProject,
   useRewards, useCreateReward, useUpdateReward,
+  useStoreCategories, useCreateStoreCategory, useUpdateStoreCategory,
+  useReorderStoreCategories, useDeleteStoreCategory,
   useDepartments, useCreateDepartment, useUpdateDepartment, useSetDepartmentActive,
   useDeleteDepartment, useDepartmentMemberCount,
   useBadgeDefinitions,

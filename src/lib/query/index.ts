@@ -88,6 +88,10 @@ export function useInvalidate() {
       () => qc.invalidateQueries({ queryKey: keys.reference.rewardsPrefix() }),
       [qc],
     ),
+    storeCategories: useCallback(
+      () => qc.invalidateQueries({ queryKey: keys.reference.storeCategories() }),
+      [qc],
+    ),
 
     /**
      * Project assignments.

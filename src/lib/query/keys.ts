@@ -95,6 +95,8 @@ export const keys = {
 
     rewards: () => [...keys.reference.all, 'rewards'] as const,
     rewardsPrefix: () => [...keys.reference.all, 'rewards'] as const,
+    /** The Value Store's shelves (062). Read by the store and the HR form. */
+    storeCategories: () => [...keys.reference.all, 'store-categories'] as const,
     departments: (activeOnly: boolean) =>
       [...keys.reference.all, 'departments', { activeOnly }] as const,
     departmentsPrefix: () => [...keys.reference.all, 'departments'] as const,

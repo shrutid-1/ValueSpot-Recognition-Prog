@@ -38,6 +38,8 @@ export type AuditLog            = Database['public']['Tables']['audit_logs']['Ro
 export type AppConfig           = Database['public']['Tables']['app_config']['Row']
 export type Reward              = Database['public']['Tables']['rewards']['Row']
 export type RewardAssignment    = Database['public']['Tables']['reward_assignments']['Row']
+/** A shelf of the Value Store (migration 062). */
+export type StoreCategory       = Database['public']['Tables']['reward_categories']['Row']
 
 // === View types ===
 export type RecognitionFeedItem = Database['public']['Views']['v_recognition_feed']['Row']

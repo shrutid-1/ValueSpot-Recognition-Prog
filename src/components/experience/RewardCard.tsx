@@ -7,7 +7,7 @@ import { useRedeemReward } from '@/hooks/queries'
 import { useValueCoins } from '@/context/ValueCoinContext'
 import { validityLabel } from '@/lib/reward-validity'
 import { formatIST } from '@/lib/date-utils'
-import { CATEGORY_MARK } from './rewardMarks'
+import { useCategoryMark } from './rewardMarks'
 import { ValueCoin } from './ValueCoin'
 import { ValueCoinDelta } from './ValueCoinFigure'
 import { dismissOnBackdrop } from '@/lib/backdrop'
@@ -38,6 +38,7 @@ interface RewardCardProps {
  */
 export function RewardCard({ reward, earned }: RewardCardProps) {
   const [confirming, setConfirming] = useState(false)
+  const categoryMark = useCategoryMark()
 
   const affordable = earned >= reward.coin_price
   const shortfall = Math.max(reward.coin_price - earned, 0)
@@ -45,7 +46,7 @@ export function RewardCard({ reward, earned }: RewardCardProps) {
     ? Math.min(100, (earned / reward.coin_price) * 100)
     : 0
 
-  const mark = CATEGORY_MARK[reward.category] ?? CATEGORY_MARK.everyday
+  const mark = categoryMark(reward.category)
   const Mark = mark.icon
 
   return (

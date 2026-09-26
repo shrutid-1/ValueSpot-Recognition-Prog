@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { Plus, Edit2, Gift, X } from 'lucide-react'
-import { useRewards, useCreateReward, useUpdateReward } from '@/hooks/queries'
+import { Plus, Edit2, Gift, X, LayoutGrid } from 'lucide-react'
+import { useRewards, useCreateReward, useUpdateReward, useStoreCategories } from '@/hooks/queries'
 import { errorMessage } from '@/lib/query'
 import {
   REWARD_VALIDITY_MIN, REWARD_VALIDITY_MAX, REWARD_VALIDITY_DEFAULT,
 } from '@/lib/api'
 import type { Reward, RewardCategory } from '@/types'
 import { RedemptionQueue } from '@/components/hr/RedemptionQueue'
+import { StoreCategoriesDialog } from '@/components/hr/StoreCategoriesDialog'
+import { markFor } from '@/components/experience/rewardMarks'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -59,21 +61,31 @@ export default function RewardsPage() {
   const createReward  = useCreateReward()
   const updateReward  = useUpdateReward()
 
+  const categoriesQuery = useStoreCategories()
+
   const rewards = rewardsQuery.data ?? []
   const loading = rewardsQuery.isPending
+  const categories = categoriesQuery.data ?? []
 
   const [showForm, setShowForm]   = useState(false)
+  const [showCategories, setShowCategories] = useState(false)
   const [editing, setEditing]     = useState<Reward | null>(null)
-  const [form, setForm]           = useState({ name: '', description: '', frequency: '', eligibility_criteria: '', value_description: '', requires_approval: true, coin_price: 0, category: 'everyday' as RewardCategory, redemption_validity_days: REWARD_VALIDITY_DEFAULT, is_active: true })
+  const [form, setForm]           = useState({ name: '', description: '', frequency: '', eligibility_criteria: '', value_description: '', requires_approval: true, coin_price: 0, category: '' as RewardCategory, redemption_validity_days: REWARD_VALIDITY_DEFAULT, is_active: true })
   const [saving, setSaving]       = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
-  const openAdd  = () => { setEditing(null); setForm({ name: '', description: '', frequency: '', eligibility_criteria: '', value_description: '', requires_approval: true, coin_price: 0, category: 'everyday', redemption_validity_days: REWARD_VALIDITY_DEFAULT, is_active: true }); setSaveError(null); setShowForm(true) }
+  // A new reward starts on the first shelf, whichever that is now — HR can
+  // remove any of them, so no particular one can be assumed.
+  const openAdd  = () => { setEditing(null); setForm({ name: '', description: '', frequency: '', eligibility_criteria: '', value_description: '', requires_approval: true, coin_price: 0, category: categories[0]?.slug ?? '', redemption_validity_days: REWARD_VALIDITY_DEFAULT, is_active: true }); setSaveError(null); setShowForm(true) }
   const openEdit = (r: Reward) => { setEditing(r); setForm({ name: r.name, description: r.description ?? '', frequency: r.frequency ?? '', eligibility_criteria: r.eligibility_criteria ?? '', value_description: r.value_description ?? '', requires_approval: r.requires_approval, coin_price: r.coin_price, category: r.category, redemption_validity_days: r.redemption_validity_days, is_active: r.is_active }); setSaveError(null); setShowForm(true) }
   const closeForm = () => { setShowForm(false); setSaveError(null) }
 
   const save = async () => {
     if (!form.name.trim()) { setSaveError('A name is required.'); return }
+    if (!categories.some(c => c.slug === form.category)) {
+      setSaveError('Choose a store category.')
+      return
+    }
     /*
       Said here rather than left to the CHECK. The database refuses a 0 or a
       400 with a constraint name, which is the right answer to the wrong
@@ -139,10 +151,15 @@ export default function RewardsPage() {
         title="Rewards"
         subtitle="The Value Store catalogue. Set what each reward costs in Value Coins and whether you approve it before it is fulfilled."
         actions={
-          <button className="vs-btn vs-btn-primary relative" onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
-            <Plus size={13} aria-hidden="true" /> Add Reward
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button className="vs-btn" onClick={() => setShowCategories(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <LayoutGrid size={13} aria-hidden="true" /> Store categories
+            </button>
+            <button className="vs-btn vs-btn-primary relative" onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <i className="corner tl" /><i className="corner tr" /><i className="corner bl" /><i className="corner br" />
+              <Plus size={13} aria-hidden="true" /> Add Reward
+            </button>
+          </div>
         }
       />
 
@@ -185,7 +202,7 @@ export default function RewardsPage() {
                   <span className={`vs-tag ${r.is_active ? 'vs-tag-accent' : 'vs-tag-neutral'}`}>{r.is_active ? 'Active' : 'Inactive'}</span>
                   {r.frequency && <span className="vs-tag vs-tag-neutral" style={{ textTransform: 'capitalize' }}>{r.frequency}</span>}
                   {r.requires_approval && <span className="vs-tag vs-tag-outline">Requires approval</span>}
-                  <span className="vs-tag vs-tag-neutral" style={{ textTransform: 'capitalize' }}>{r.category}</span>
+                  <span className="vs-tag vs-tag-neutral">{markFor(r.category, categories).label}</span>
                   {/* An unpriced reward cannot be redeemed, so say so here
                       rather than letting it sit invisibly out of the store. */}
                   <span className="vs-tag vs-tag-neutral">
@@ -233,13 +250,27 @@ export default function RewardsPage() {
             </p>
           </FL>
           <FL label="Store category">
-            <select className="vs-input w-full" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as RewardCategory }))}>
-              <option value="everyday">Everyday</option>
-              <option value="experiences">Experiences</option>
-              <option value="learning">Learning</option>
-              <option value="wellness">Wellness</option>
-              <option value="recognition">Recognition</option>
+            <select
+              className="vs-input w-full"
+              value={form.category}
+              onChange={e => setForm(f => ({ ...f, category: e.target.value as RewardCategory }))}
+              disabled={categoriesQuery.isPending || categories.length === 0}
+            >
+              {/* Until one is chosen — or while the list is still arriving —
+                  say so, rather than let the browser show the first option
+                  as if it had been picked. */}
+              {!categories.some(c => c.slug === form.category) && (
+                <option value="" disabled>
+                  {categoriesQuery.isPending ? 'Loading…' : categories.length === 0 ? 'No categories yet' : 'Choose a category'}
+                </option>
+              )}
+              {categories.map(c => <option key={c.slug} value={c.slug}>{c.label}</option>)}
             </select>
+            {categoriesQuery.isError && (
+              <p className="text-danger" style={{ fontSize: 11.5, marginTop: 4 }}>
+                {errorMessage(categoriesQuery.error, 'Could not load the store categories.')}
+              </p>
+            )}
           </FL>
         </div>
         <FL label="Redemption Validity" required>
@@ -297,6 +328,12 @@ export default function RewardsPage() {
           </div>
         )}
       </FormDialog>
+
+      <StoreCategoriesDialog
+        open={showCategories}
+        onClose={() => setShowCategories(false)}
+        rewards={rewards}
+      />
     </div>
   )
 }

@@ -229,12 +229,8 @@ export const storeApi = {
   },
 }
 
-/** The shelves, in the order the store lists them. */
-export const REWARD_CATEGORIES: { value: RewardCategory | 'all'; label: string }[] = [
-  { value: 'all',         label: 'Everything' },
-  { value: 'everyday',    label: 'Everyday' },
-  { value: 'experiences', label: 'Experiences' },
-  { value: 'learning',    label: 'Learning' },
-  { value: 'wellness',    label: 'Wellness' },
-  { value: 'recognition', label: 'Recognition' },
-]
+/*
+  The shelves used to be listed here as a constant. Since migration 062 they
+  are rows in `reward_categories` that HR edits — see
+  referenceApi.listStoreCategories and useStoreCategories.
+*/

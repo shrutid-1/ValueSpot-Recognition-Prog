@@ -404,6 +404,63 @@ check(
   'Showing it here would invite the confusion the two balances exist to avoid.',
 )
 
+// ── 11. The shelves are HR's, not the code's (062) ──────────
+console.log(`\n${C.bold}Store categories${C.reset}`)
+
+const M062 = stripComments(read('supabase/migrations/062_reward_categories.sql'))
+
+check(
+  'rewards.category is a foreign key to reward_categories, not a fixed CHECK',
+  /DROP CONSTRAINT IF EXISTS rewards_category_check/.test(M062) &&
+    /FOREIGN KEY \(category\) REFERENCES reward_categories\(slug\)/.test(M062),
+)
+
+{
+  const del = fnBody(M062, 'delete_reward_category')
+  check(
+    'removing a category moves its rewards and deletes it in one function',
+    /UPDATE rewards SET category/.test(del) && /DELETE FROM reward_categories/.test(del),
+    'Split across two calls, a failure between them strands rewards or refuses the delete.',
+  )
+  check(
+    'removal refuses the last category',
+    /count\(\*\) FROM reward_categories\) <= 1/.test(del),
+  )
+  for (const name of ['create_reward_category', 'delete_reward_category']) {
+    const body = fnBody(M062, name)
+    check(
+      `${name}() re-reads the role from employees and checks the second factor`,
+      /FROM employees WHERE id = actor/.test(body) && /session_second_factor_ok\(\)/.test(body),
+    )
+  }
+  check(
+    'there is no INSERT or DELETE policy on reward_categories',
+    !/ON reward_categories\s+FOR (INSERT|DELETE|ALL)/.test(M062),
+    'Creation and removal go through their functions or nowhere.',
+  )
+}
+
+{
+  /* The five original slugs written out as a list anywhere in the browser is
+     the hard-coded catalogue coming back. The seeded-glyph fallback in
+     rewardMarks.ts is the one sanctioned mention, and it is a map, not a
+     list of choices. */
+  const offenders = [
+    'src/pages/hr/RewardsPage.tsx',
+    'src/pages/employee/ValueStorePage.tsx',
+    'src/components/experience/RewardCard.tsx',
+    'src/components/experience/MyRedemptions.tsx',
+    'src/components/experience/RedemptionDetail.tsx',
+    'src/lib/api/store.ts',
+    'src/lib/api/reference.ts',
+  ].filter(f => /['"](everyday|experiences|wellness|recognition)['"]/.test(read(f)))
+  check(
+    'no screen or API hard-codes the original category list',
+    offenders.length === 0,
+    `Found in: ${offenders.join(', ')}`,
+  )
+}
+
 console.log(
   failed === 0
     ? `\n${C.green}${C.bold}VALUE STORE OK${C.reset} ${C.dim}(static checks)${C.reset}\n`

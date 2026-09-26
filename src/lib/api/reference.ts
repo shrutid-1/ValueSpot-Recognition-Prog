@@ -18,7 +18,7 @@
  */
 import type {
   CoreValue, Behaviour, Scenario, Project, Reward, Department, BadgeDefinition,
-  UserRole, RewardCategory,
+  UserRole, RewardCategory, StoreCategory,
 } from '@/types'
 import { supabase, toApiError, ApiError } from './client'
 
@@ -33,6 +33,9 @@ export const REWARD_VALIDITY_MIN = 1
 export const REWARD_VALIDITY_MAX = 365
 export const REWARD_VALIDITY_DEFAULT = 14
 
+/** The longest store category name `reward_categories_label_shape` (062) allows. */
+export const STORE_CATEGORY_LABEL_MAX = 40
+
 /**
  * A whole number of days inside that range.
  *
@@ -45,6 +48,25 @@ export const REWARD_VALIDITY_DEFAULT = 14
 function clampValidityDays(days: number | undefined): number {
   if (days === undefined || !Number.isFinite(days)) return REWARD_VALIDITY_DEFAULT
   return Math.min(REWARD_VALIDITY_MAX, Math.max(REWARD_VALIDITY_MIN, Math.floor(days)))
+}
+
+/**
+ * A refused reward write, worded for the Rewards form.
+ *
+ * 23503 on `rewards` can only be rewards_category_fkey (062): the shelf was
+ * removed — probably by another admin — after the form loaded its dropdown.
+ * The shared translator's "references something that no longer exists" is
+ * true but does not say what to do about it.
+ */
+function rewardWriteError(error: unknown, fallback: string): ApiError {
+  if ((error as { code?: string } | null)?.code === '23503') {
+    return new ApiError(
+      'That store category has just been removed. Choose another category and save again.',
+      'missing_reference',
+      error,
+    )
+  }
+  return toApiError(error, fallback)
 }
 
 /** Most screens want only what is in use; the admin screens want everything. */
@@ -584,8 +606,12 @@ export const referenceApi = {
      * one rather than offering a control that can only fail.
      */
     coinPrice?: number
-    /** Which shelf of the store it sits on (051). */
-    category?: RewardCategory
+    /**
+     * Which shelf of the store it sits on (051) — a reward_categories slug.
+     * Required since 062: HR can remove any shelf, so there is no longer one
+     * safe to assume as a default.
+     */
+    category: RewardCategory
     /**
      * Days an approved redemption stays usable, counted from fulfilment
      * (052). Clamped to the 1-365 the CHECK allows, so a stray 0 or a typed
@@ -604,11 +630,11 @@ export const referenceApi = {
       value_description: input.valueDescription ?? null,
       requires_approval: input.requiresApproval ?? true,
       coin_price: Math.max(0, Math.floor(input.coinPrice ?? 0)),
-      category: input.category ?? 'everyday',
+      category: input.category,
       redemption_validity_days: clampValidityDays(input.validityDays),
       is_active: true,
     })
-    if (error) throw toApiError(error, 'Could not create that reward.')
+    if (error) throw rewardWriteError(error, 'Could not create that reward.')
   },
 
   async updateReward(id: string, input: {
@@ -650,7 +676,140 @@ export const referenceApi = {
     if (Object.keys(patch).length === 0) return
 
     const { error } = await supabase.from('rewards').update(patch).eq('id', id)
-    if (error) throw toApiError(error, 'Could not save that reward.')
+    if (error) throw rewardWriteError(error, 'Could not save that reward.')
+  },
+
+  // ── Store categories (062) ────────────────────────────────
+
+  /**
+   * Every shelf of the Value Store, in shelf order.
+   *
+   * Read by the HR catalogue and by the store alike — `reward_categories_read`
+   * lets any verified session see them, because the store draws its shelf
+   * tabs and each card's label from this list.
+   */
+  async listStoreCategories(): Promise<StoreCategory[]> {
+    const { data, error } = await supabase
+      .from('reward_categories')
+      .select('*')
+      .order('display_order', { ascending: true })
+      .order('label', { ascending: true })
+
+    if (error) throw toApiError(error, 'Could not load the store categories.')
+    return (data ?? []) as StoreCategory[]
+  },
+
+  /**
+   * Add a shelf. The database derives the slug from the label and puts the
+   * new shelf last; both come back on the returned row.
+   */
+  async createStoreCategory(input: { label: string; icon: string }): Promise<StoreCategory> {
+    const label = input.label.trim().replace(/\s+/g, ' ')
+    if (!label) throw new ApiError('Give the category a name.', 'invalid')
+    if (label.length > STORE_CATEGORY_LABEL_MAX) {
+      throw new ApiError(
+        `Keep the category name to ${STORE_CATEGORY_LABEL_MAX} characters or fewer.`,
+        'invalid',
+      )
+    }
+
+    const { data, error } = await supabase.rpc('create_reward_category', {
+      p_label: label,
+      p_icon: input.icon,
+    })
+
+    if (error) throw toApiError(error, 'Could not add that category.')
+    return data as unknown as StoreCategory
+  },
+
+  /**
+   * Rename a shelf, change its glyph or move it along the row.
+   *
+   * The slug is not editable — rewards point at it. `.select('slug')` for the
+   * same zero-row reason as setProjectActive: an UPDATE that RLS filters out
+   * succeeds against nothing, and the screen would report a save that never
+   * happened.
+   */
+  async updateStoreCategory(slug: string, input: {
+    label?: string
+    icon?: string
+    displayOrder?: number
+  }): Promise<void> {
+    const patch: Partial<StoreCategory> = {}
+    if (input.label !== undefined) {
+      const label = input.label.trim().replace(/\s+/g, ' ')
+      if (!label) throw new ApiError('Give the category a name.', 'invalid')
+      if (label.length > STORE_CATEGORY_LABEL_MAX) {
+        throw new ApiError(
+          `Keep the category name to ${STORE_CATEGORY_LABEL_MAX} characters or fewer.`,
+          'invalid',
+        )
+      }
+      patch.label = label
+    }
+    if (input.icon !== undefined) patch.icon = input.icon
+    if (input.displayOrder !== undefined) patch.display_order = input.displayOrder
+
+    if (Object.keys(patch).length === 0) return
+
+    const { data, error } = await supabase
+      .from('reward_categories')
+      .update(patch)
+      .eq('slug', slug)
+      .select('slug')
+
+    if (error) {
+      // lower(label) is unique: two shelves may not share a name.
+      if ((error as { code?: string }).code === '23505') {
+        throw new ApiError(`There is already a category called ${patch.label}.`, 'duplicate', error)
+      }
+      throw toApiError(error, 'Could not save that category.')
+    }
+
+    if (!data || data.length === 0) {
+      throw new ApiError(
+        'That category was not updated. It may have been removed, or your session is not permitted to change store categories.',
+        'not_applied',
+      )
+    }
+  },
+
+  /**
+   * Put the shelves in this order.
+   *
+   * Only the shelves whose position actually changes are written, so moving
+   * one shelf up one place is two small updates, not one per shelf.
+   */
+  async reorderStoreCategories(ordered: StoreCategory[]): Promise<void> {
+    for (const [index, category] of ordered.entries()) {
+      const position = index + 1
+      if (category.display_order !== position) {
+        await referenceApi.updateStoreCategory(category.slug, { displayOrder: position })
+      }
+    }
+  },
+
+  /**
+   * Remove a shelf, moving whatever rewards sit on it to `moveTo`.
+   *
+   * The move and the delete are one transaction inside
+   * delete_reward_category(), which also re-counts the rewards itself: the
+   * count the screen showed is for the person deciding, not a permission.
+   */
+  async deleteStoreCategory(slug: string, moveTo: string | null): Promise<{ rewardsMoved: number }> {
+    const { data, error } = await supabase.rpc('delete_reward_category', {
+      p_slug: slug,
+      p_move_to: moveTo,
+    })
+
+    if (error) throw toApiError(error, 'Could not remove that category.')
+
+    const result = data as { status?: string; rewards_moved?: number } | null
+    if (result?.status !== 'ok') {
+      throw new ApiError('Could not remove that category.', result?.status ?? 'unknown')
+    }
+
+    return { rewardsMoved: result.rewards_moved ?? 0 }
   },
 
   /** Active departments, for the assignment dropdowns. */

@@ -48,9 +48,14 @@ export type ValueCoinTransactionKind =
 /** Which of the two balances a ledger row moved (migration 050). */
 export type ValueCoinAccount = 'budget' | 'earned'
 
-/** Which shelf of the Value Store a reward sits on (migration 051). */
-export type RewardCategory =
-  | 'everyday' | 'experiences' | 'learning' | 'wellness' | 'recognition'
+/**
+ * Which shelf of the Value Store a reward sits on: a `reward_categories.slug`.
+ *
+ * A closed list of five until migration 062, which made the shelves rows HR
+ * edits. The five original slugs still exist unless HR removed them, but no
+ * code may assume any particular slug does.
+ */
+export type RewardCategory = string
 
 /** How a reward_assignments row came to exist (migration 051). */
 export type RewardAssignmentOrigin = 'hr_assignment' | 'redemption'
@@ -863,7 +868,10 @@ export interface Database {
           value_description: string | null
           /** Migration 051. What it costs in the Value Store. 0 = unpriced. */
           coin_price: number
-          /** Migration 051. Which shelf of the store it sits on. */
+          /**
+           * Migration 051. Which shelf of the store it sits on — a
+           * reward_categories.slug, enforced by a foreign key since 062.
+           */
           category: RewardCategory
           /**
            * Migration 052. Days an approved redemption stays usable, counted
@@ -881,6 +889,29 @@ export interface Database {
           'requires_approval' | 'is_active' | 'redemption_validity_days'
         >
         Update: UpdateFor<Database['public']['Tables']['rewards']['Row']>
+        Relationships: []
+      }
+      /**
+       * Migration 062. The Value Store's shelves, edited by HR and a Super
+       * Admin. Created and removed only through create_reward_category() and
+       * delete_reward_category(); label, icon and order are plain updates.
+       */
+      reward_categories: {
+        Row: {
+          /** What rewards.category holds. Never changes after creation. */
+          slug: string
+          label: string
+          /** A key into CATEGORY_ICONS (rewardMarks.ts). */
+          icon: string
+          display_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: InsertFor<
+          Database['public']['Tables']['reward_categories']['Row'],
+          'icon' | 'display_order'
+        >
+        Update: UpdateFor<Database['public']['Tables']['reward_categories']['Row']>
         Relationships: []
       }
       reward_assignments: {
@@ -1216,6 +1247,22 @@ export interface Database {
        */
       delete_department: {
         Args: { p_department_id: string }
+        Returns: Json
+      }
+      /**
+       * Migration 062. Adds a store category; the slug and position are
+       * derived in the database. Returns the new row.
+       */
+      create_reward_category: {
+        Args: { p_label: string; p_icon?: string }
+        Returns: Json
+      }
+      /**
+       * Migration 062. Removes a store category, moving any rewards on it to
+       * `p_move_to` in the same transaction. Refuses the last category.
+       */
+      delete_reward_category: {
+        Args: { p_slug: string; p_move_to?: string | null }
         Returns: Json
       }
       /**

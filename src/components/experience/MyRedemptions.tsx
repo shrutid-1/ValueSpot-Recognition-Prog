@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { errorMessage } from '@/lib/query'
 import { formatIST } from '@/lib/date-utils'
 import { remainingLabel, statusTone } from '@/lib/reward-validity'
-import { markFor } from './rewardMarks'
+import { useCategoryMark } from './rewardMarks'
 import { RedemptionDetail } from './RedemptionDetail'
 import { ValueCoin } from './ValueCoin'
 
@@ -99,7 +99,8 @@ function RedemptionCard({
   redemption: MyRedemption
   onOpen: () => void
 }) {
-  const mark = markFor(redemption.reward_category)
+  const categoryMark = useCategoryMark()
+  const mark = categoryMark(redemption.reward_category)
   const Mark = mark.icon
   const spent = redemption.effective_status === 'expired'
 

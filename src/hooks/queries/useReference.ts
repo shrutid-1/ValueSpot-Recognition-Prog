@@ -375,6 +375,66 @@ export function useUpdateReward() {
 }
 
 /**
+ * The Value Store's shelves, in order (062).
+ *
+ * One cached copy serves the HR form's dropdown, the category manager, the
+ * store's shelf tabs and the label on every reward and redemption card.
+ */
+export function useStoreCategories() {
+  return useQuery({
+    queryKey: keys.reference.storeCategories(),
+    queryFn: () => referenceApi.listStoreCategories(),
+    staleTime: REFERENCE_STALE_TIME,
+  })
+}
+
+export function useCreateStoreCategory() {
+  const invalidate = useInvalidate()
+  return useMutation({
+    mutationFn: referenceApi.createStoreCategory,
+    onSuccess: () => { void invalidate.storeCategories() },
+  })
+}
+
+/** Rename or re-icon a shelf. Rewards point at the slug, so none of them move. */
+export function useUpdateStoreCategory() {
+  const invalidate = useInvalidate()
+  return useMutation({
+    mutationFn: (vars: { slug: string; label?: string; icon?: string }) =>
+      referenceApi.updateStoreCategory(vars.slug, vars),
+    onSuccess: () => { void invalidate.storeCategories() },
+  })
+}
+
+export function useReorderStoreCategories() {
+  const invalidate = useInvalidate()
+  return useMutation({
+    mutationFn: referenceApi.reorderStoreCategories,
+    // Settled, not success: a reorder that failed half way has still moved
+    // one shelf, and the list should show where things really are.
+    onSettled: () => { void invalidate.storeCategories() },
+  })
+}
+
+export function useDeleteStoreCategory() {
+  const invalidate = useInvalidate()
+  return useMutation({
+    mutationFn: (vars: { slug: string; moveTo: string | null }) =>
+      referenceApi.deleteStoreCategory(vars.slug, vars.moveTo),
+    onSuccess: () => {
+      void invalidate.storeCategories()
+      /*
+        The rewards that sat on it are on another shelf now, so both the HR
+        catalogue and the store's copy of it are stale — as is anybody's
+        redemption list, which reads the shelf through the reward.
+      */
+      void invalidate.rewards()
+      void invalidate.store()
+    },
+  })
+}
+
+/**
  * Departments.
  *
  * Reference data, so it lives here rather than with employees — the assignment

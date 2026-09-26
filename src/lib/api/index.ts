@@ -29,7 +29,7 @@ export type {
 export { commentsApi } from './comments'
 export type { RecognitionComment, CommentThread } from './comments'
 
-export { storeApi, REWARD_CATEGORIES } from './store'
+export { storeApi } from './store'
 export type { MyRedemption, RedemptionRequest, RedeemResult } from './store'
 
 export { coinAdminApi } from './coinAdmin'
@@ -46,6 +46,7 @@ export { referenceApi } from './reference'
    what the rule is instead of letting the constraint say it. */
 export {
   REWARD_VALIDITY_MIN, REWARD_VALIDITY_MAX, REWARD_VALIDITY_DEFAULT,
+  STORE_CATEGORY_LABEL_MAX,
 } from './reference'
 export type {
   ActiveFilter, BehaviourWithValue, ScenarioWithContext, ProjectWithManager,

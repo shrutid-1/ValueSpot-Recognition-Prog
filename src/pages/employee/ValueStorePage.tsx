@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { RewardCategory } from '@/types'
-import { REWARD_CATEGORIES } from '@/lib/api'
-import { useStoreRewards, useWalletSummary } from '@/hooks/queries'
+import { useStoreCategories, useStoreRewards, useWalletSummary } from '@/hooks/queries'
 import { useAuth } from '@/context/AuthContext'
 import { useCoinPulse } from '@/hooks/useCoinPulse'
 import { errorMessage } from '@/lib/query'
@@ -56,6 +55,7 @@ export default function ValueStorePage() {
   const [shelf, setShelf] = useState<RewardCategory | 'all'>('all')
 
   const rewardsQuery = useStoreRewards()
+  const categoriesQuery = useStoreCategories()
   const wallet = useWalletSummary(employee?.id)
   /* Only the earned balance can move on this screen — the giving budget is
      not spendable here and is deliberately not even read. */
@@ -67,6 +67,21 @@ export default function ValueStorePage() {
   const shown = useMemo(
     () => (shelf === 'all' ? rewards : rewards.filter(r => r.category === shelf)),
     [rewards, shelf],
+  )
+
+  /*
+    The shelf tabs: every category HR has set up, in their order, but only
+    those with something on them. A tab that opens onto an empty shelf is a
+    control that can only disappoint.
+  */
+  const shelves = useMemo(
+    () => [
+      { value: 'all' as const, label: 'Everything' },
+      ...(categoriesQuery.data ?? [])
+        .filter(c => rewards.some(r => r.category === c.slug))
+        .map(c => ({ value: c.slug, label: c.label })),
+    ],
+    [categoriesQuery.data, rewards],
   )
 
   const withinReach = useMemo(
@@ -158,11 +173,9 @@ export default function ValueStorePage() {
         )}
 
         {/* Shelves. Only offered once there is more than one thing to sort. */}
-        {rewards.length > 1 && (
+        {rewards.length > 1 && shelves.length > 1 && (
           <div className="vsx-wallet-tabs" role="tablist" aria-label="Reward categories">
-            {REWARD_CATEGORIES.filter(
-              c => c.value === 'all' || rewards.some(r => r.category === c.value),
-            ).map(c => (
+            {shelves.map(c => (
               <button
                 key={c.value}
                 type="button"
