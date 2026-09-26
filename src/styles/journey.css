@@ -1,0 +1,711 @@
+/* ============================================================================
+   CORE VALUE JOURNEY — the season panel and one trail per value
+   ============================================================================
+
+   Like Profile, this route is rendered inside BOTH shells: the Employee
+   portal's dark canvas, and the administrative light one when a Manager or
+   HR opens it. `.vj-scope` sets local tokens from whichever system is in
+   force and every rule reads those.
+
+   Each value's colour arrives inline as two custom properties, --vt-d
+   (the light fill tone for the dark canvas) and --vt-l (the darker mark
+   for white). `.vj-toned` picks the one that reads on the canvas it is on.
+
+   Motion tells the story once, on arrival: each trail fills from the start,
+   the marker travels with it, and every badge it passes lights as the fill
+   reaches it. After that only the next stop moves — a slow ring — so the eye
+   lands on the target, not on everything at once.
+   ========================================================================= */
+
+.vj-scope {
+  --vj-panel:    #ffffff;
+  --vj-inset:    var(--color-neutral-100);
+  --vj-ink:      var(--color-text);
+  --vj-muted:    var(--color-neutral-600);
+  --vj-faint:    var(--color-neutral-500);
+  --vj-rule:     var(--color-divider);
+  --vj-node-off: var(--color-neutral-100);
+  --vj-on-tone:  #ffffff;
+  --vj-radius:   20px;
+  --vj-shadow:   0 1px 2px rgba(16, 16, 20, 0.05), 0 14px 36px rgba(16, 16, 20, 0.07);
+  --vj-ease:     cubic-bezier(0.2, 0.7, 0.3, 1);
+  --vj-glow:     22%;
+}
+
+[data-vs-portal='admin'] .vj-scope {
+  --vj-panel:    var(--ad-panel);
+  --vj-inset:    var(--ad-inset);
+  --vj-ink:      var(--ad-text);
+  --vj-muted:    var(--ad-text-2);
+  --vj-faint:    var(--ad-text-3);
+  --vj-rule:     var(--ad-line-2);
+  --vj-node-off: var(--ad-inset);
+  --vj-radius:   var(--ad-r);
+  --vj-shadow:   var(--ad-shadow-md);
+}
+
+[data-vs-theme='dark'] .vj-scope {
+  --vj-panel:    var(--vsx-ink-2);
+  --vj-inset:    var(--vsx-ink-3);
+  --vj-ink:      var(--vsx-text);
+  --vj-muted:    var(--vsx-text-2);
+  --vj-faint:    var(--vsx-text-3);
+  --vj-rule:     var(--vsx-rule-2);
+  --vj-node-off: var(--vsx-ink-3);
+  --vj-on-tone:  var(--vsx-on-fill);
+  --vj-radius:   var(--vsx-r);
+  --vj-shadow:   var(--vsx-lift);
+  --vj-glow:     34%;
+}
+
+/* The administrative system sets its headings in sentence case. */
+[data-vs-portal='admin'] .vj-scope :is(.vj-season-title, .vj-held, .vj-goal-text strong, .vj-stop-name) {
+  text-transform: none;
+}
+
+.vj-toned { --vj-tone: var(--vt-l, var(--vj-ink)); }
+[data-vs-theme='dark'] .vj-toned { --vj-tone: var(--vt-d, var(--vj-ink)); }
+
+.vj-tone-text { color: var(--vj-tone); }
+
+.vj-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vj-panel {
+  position: relative;
+  background: var(--vj-panel);
+  border-radius: var(--vj-radius);
+  box-shadow: var(--vj-shadow);
+  color: var(--vj-ink);
+}
+
+.vj-dot-sep {
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+  vertical-align: middle;
+}
+
+/* ---- Season panel -------------------------------------------------------- */
+
+.vj-season {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 28px;
+  padding: 24px 26px;
+  overflow: hidden;
+  animation: vj-rise 480ms var(--vj-ease) both;
+}
+
+/* A wash of the closest value's colour behind the call to action. */
+.vj-season.has-focus::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    110% 130% at 0% 0%,
+    color-mix(in srgb, var(--vj-tone) 13%, transparent),
+    transparent 62%
+  );
+}
+
+.vj-season > * { position: relative; }
+
+.vj-season-lead {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The call to action sits in the middle of whatever height the collection sets. */
+.vj-season-body { margin: auto 0; }
+
+.vj-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.vj-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vj-ink);
+  background: color-mix(in srgb, var(--vj-tone) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vj-tone) 30%, transparent);
+}
+
+.vj-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--vj-tone);
+}
+
+.vj-chip-to {
+  font-weight: 500;
+  color: var(--vj-muted);
+}
+
+.vj-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vj-muted);
+  margin-bottom: 18px;
+}
+
+.vj-season-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vj-tone);
+  margin-bottom: 6px;
+}
+
+.vj-season-goal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vj-season-num {
+  font-size: 76px;
+  font-weight: 600;
+  line-height: 0.85;
+  color: var(--vj-tone);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 28px color-mix(in srgb, var(--vj-tone) var(--vj-glow), transparent);
+}
+
+.vj-season-title {
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.vj-season-sub {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--vj-muted);
+  max-width: 440px;
+}
+
+.vj-season-sub strong { font-weight: 600; }
+
+.vj-collection {
+  padding: 16px 18px;
+  border-radius: calc(var(--vj-radius) - 6px);
+  background: var(--vj-inset);
+  align-self: start;
+}
+
+.vj-collection-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.vj-collection-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vj-muted);
+}
+
+.vj-collection-count {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.vj-collection-count span {
+  font-size: 16px;
+  color: var(--vj-faint);
+}
+
+.vj-collection-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.vj-collection-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vj-collection-name {
+  font-size: 12px;
+  color: var(--vj-muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vj-cells {
+  display: grid;
+  grid-template-columns: repeat(5, 22px);
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.vj-cell {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--vj-rule);
+}
+
+.vj-cell.is-on {
+  background: var(--vj-tone);
+  animation: vj-cell 420ms var(--vj-ease) both;
+  animation-delay: var(--vj-cd);
+}
+
+.vj-cell.is-next {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vj-tone) 70%, transparent);
+}
+
+.vj-collection-foot {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--vj-muted);
+}
+
+/* ---- A value's trail ----------------------------------------------------- */
+
+.vj-track {
+  padding: 22px 26px 18px;
+  animation: vj-rise 480ms var(--vj-ease) both;
+  animation-delay: var(--vj-enter);
+}
+
+/* A value's colour runs down its left edge, as it did on the old cards. */
+.vj-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22px;
+  bottom: 22px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--vj-tone);
+}
+
+.vj-track-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vj-value-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vj-tone);
+}
+
+.vj-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--vj-on-tone);
+  background: var(--vj-tone);
+}
+
+.vj-held {
+  margin-top: 4px;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+}
+
+.vj-held.is-none { color: var(--vj-faint); }
+
+.vj-meta {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--vj-muted);
+}
+
+.vj-goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 8px 14px 8px 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--vj-tone) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vj-tone) 28%, transparent);
+}
+
+.vj-goal-num {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--vj-tone);
+  font-variant-numeric: tabular-nums;
+}
+
+.vj-goal-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--vj-muted);
+}
+
+.vj-goal-text strong {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--vj-ink);
+}
+
+.vj-goal-glyph {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--vj-on-tone);
+  background: var(--vj-tone);
+}
+
+/*
+  The trail. Stops sit at even intervals on a rail, the marker rides the rail
+  above them and captions hang below. Side margins leave room for the marker
+  pill at the start and the final caption at the end.
+*/
+.vj-trail {
+  --vj-rail-y: 50px;
+  position: relative;
+  height: 116px;
+  margin: 18px 46px 0 30px;
+}
+
+.vj-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--vj-rail-y) - 2px);
+  height: 4px;
+  border-radius: 999px;
+  /* The road not yet travelled is dashed, like a route on a map. */
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--vj-rule) 0 7px,
+    transparent 7px 13px
+  );
+}
+
+.vj-rail-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: calc(var(--vj-at) * 100%);
+  border-radius: inherit;
+  background: var(--vj-tone);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--vj-tone) var(--vj-glow), transparent);
+  overflow: hidden;
+  animation: vj-fill var(--vj-dur) cubic-bezier(0.3, 0.6, 0.25, 1) both;
+  animation-delay: var(--vj-delay);
+}
+
+/* A completed trail keeps a slow sheen running along it. */
+.vj-track.is-complete .vj-rail-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: vj-sheen 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--vj-delay) + var(--vj-dur));
+}
+
+.vj-start {
+  position: absolute;
+  left: 0;
+  top: var(--vj-rail-y);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--vj-tone);
+}
+
+/* ---- The marker ---------------------------------------------------------- */
+
+.vj-you {
+  position: absolute;
+  top: 0;
+  left: calc(var(--vj-at) * 100%);
+  width: 0;
+  height: var(--vj-rail-y);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  pointer-events: none;
+  animation: vj-travel var(--vj-dur) cubic-bezier(0.3, 0.6, 0.25, 1) both;
+  animation-delay: var(--vj-delay);
+}
+
+.vj-you-pill {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--vj-on-tone);
+  background: var(--vj-tone);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--vj-tone) var(--vj-glow), transparent);
+}
+
+.vj-you-stem {
+  flex: 1;
+  width: 1.5px;
+  background: linear-gradient(var(--vj-tone), transparent);
+  opacity: 0.8;
+}
+
+.vj-you-dot {
+  position: absolute;
+  top: var(--vj-rail-y);
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--vj-tone);
+  box-shadow: 0 0 0 3px var(--vj-panel);
+}
+
+.vj-you-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--vj-tone);
+  animation: vj-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--vj-delay) + var(--vj-dur));
+  opacity: 0;
+}
+
+/* ---- Stops --------------------------------------------------------------- */
+
+.vj-stops {
+  position: absolute;
+  inset: 0;
+}
+
+.vj-stop {
+  --vj-node: 32px;
+  position: absolute;
+  top: calc(var(--vj-rail-y) - var(--vj-node) / 2);
+  left: calc(var(--vj-pos) * 100%);
+  width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 3;
+}
+
+.vj-stop.is-final { --vj-node: 40px; }
+
+.vj-node {
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: var(--vj-node);
+  height: var(--vj-node);
+  border-radius: 50%;
+  background: var(--vj-node-off);
+  color: var(--vj-faint);
+  box-shadow: 0 0 0 4px var(--vj-panel), inset 0 0 0 1px var(--vj-rule);
+  transition: transform 180ms var(--vj-ease);
+}
+
+.vj-stop:hover .vj-node { transform: translateY(-2px); }
+
+.vj-stop.is-earned .vj-node {
+  background: var(--vj-tone);
+  color: var(--vj-on-tone);
+  box-shadow:
+    0 0 0 4px var(--vj-panel),
+    0 0 18px color-mix(in srgb, var(--vj-tone) var(--vj-glow), transparent);
+  animation: vj-ignite 560ms var(--vj-ease) both;
+  animation-delay: var(--vj-ignite);
+}
+
+/* The target: a dashed ring turning slowly around it, and a soft pulse. */
+.vj-stop.is-next .vj-node {
+  color: var(--vj-tone);
+  background: color-mix(in srgb, var(--vj-tone) 12%, var(--vj-panel));
+  box-shadow: 0 0 0 4px var(--vj-panel);
+  animation: vj-breathe 2.8s ease-in-out infinite;
+}
+
+.vj-stop.is-next .vj-node::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--vj-tone);
+  animation: vj-spin 16s linear infinite;
+}
+
+/* The last stop is the summit, and looks it even while locked. */
+.vj-stop.is-final.is-locked .vj-node {
+  box-shadow: 0 0 0 4px var(--vj-panel), inset 0 0 0 1px var(--vj-rule), 0 0 0 7px var(--vj-inset);
+}
+
+.vj-stop-name {
+  margin-top: 10px;
+  width: 76px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vj-faint);
+}
+
+.vj-stop.is-earned .vj-stop-name { color: var(--vj-ink); }
+.vj-stop.is-next .vj-stop-name { color: var(--vj-tone); }
+
+.vj-stop-at {
+  margin-top: 2px;
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: var(--vj-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.vj-stop.is-next .vj-stop-at { color: var(--vj-ink); font-weight: 600; }
+
+/* ---- Narrow screens ------------------------------------------------------ */
+
+@media (max-width: 720px) {
+  .vj-season {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+  .vj-season-num { font-size: 60px; }
+  .vj-season-title { font-size: 25px; }
+}
+
+@media (max-width: 560px) {
+  .vj-track { padding: 18px 18px 14px; }
+  .vj-track-head { flex-direction: column; gap: 12px; }
+  .vj-goal { align-self: stretch; }
+  .vj-held { font-size: 22px; }
+  .vj-trail { margin: 14px 26px 0 22px; }
+  .vj-stop { --vj-node: 28px; }
+  .vj-stop.is-final { --vj-node: 34px; }
+  .vj-stop-name { width: 50px; font-size: 10px; margin-top: 8px; }
+  .vj-stop-at { font-size: 10px; }
+  /* Five captions do not fit at this width. Keep the ones that orient:
+     where you are, where you're going, and where the trail ends. A lit
+     stop already says it is unlocked, so earlier ones drop "Unlocked". */
+  .vj-stop:not(.is-current):not(.is-next):not(.is-final) .vj-stop-name { visibility: hidden; }
+  .vj-stop.is-earned:not(.is-current) .vj-stop-at { visibility: hidden; }
+  .vj-cells { grid-template-columns: repeat(5, 18px); }
+}
+
+/* ---- Motion -------------------------------------------------------------- */
+
+@keyframes vj-rise {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+@keyframes vj-fill {
+  from { width: 0; }
+}
+
+@keyframes vj-travel {
+  from { left: 0; }
+}
+
+@keyframes vj-ignite {
+  0% {
+    transform: scale(0.82);
+    background: var(--vj-node-off);
+    color: var(--vj-faint);
+    box-shadow: 0 0 0 4px var(--vj-panel);
+  }
+  55% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+@keyframes vj-breathe {
+  0%, 100% { box-shadow: 0 0 0 4px var(--vj-panel), 0 0 0 4px color-mix(in srgb, var(--vj-tone) 0%, transparent); }
+  50%      { box-shadow: 0 0 0 4px var(--vj-panel), 0 0 22px 2px color-mix(in srgb, var(--vj-tone) var(--vj-glow), transparent); }
+}
+
+@keyframes vj-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes vj-ping {
+  0%   { transform: scale(1); opacity: 0.55; }
+  80%, 100% { transform: scale(2.8); opacity: 0; }
+}
+
+@keyframes vj-cell {
+  from { opacity: 0; transform: scaleX(0.3); }
+}
+
+@keyframes vj-sheen {
+  0%   { background-position: -60% 0; }
+  60%, 100% { background-position: 160% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vj-scope *,
+  .vj-scope *::before,
+  .vj-scope *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

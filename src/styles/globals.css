@@ -1,0 +1,997 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ============================================================
+     TOUCHCORE VALUESPOT — BLUEPRINT DESIGN SYSTEM
+     Touchcore brand palette: graphite ground, signal red, chrome.
+     Square corners, Barlow fonts
+     ============================================================ */
+  :root {
+    /* Core palette */
+    --color-bg:          #f4f2f2;
+    --color-surface:     #ebe9e9;
+    --color-text:        #16161a;
+    --color-accent:      #c42a20;
+    --color-accent-2:    #de584d;
+    --color-divider:     rgba(22, 22, 26, 0.16);
+
+    /* Neutral ramp */
+    --color-neutral-100: #f6f4f4;
+    --color-neutral-200: #eae7e7;
+    --color-neutral-300: #d7d3d3;
+    --color-neutral-400: #bab5b5;
+    --color-neutral-500: #9b9696;
+    /*
+      600 was #7a7a7d, which is 3.8:1 on --color-bg — under WCAG AA for the
+      11-13px secondary text it is used for almost everywhere. Darkened to
+      5.2:1. The shift is deliberately small: it fixes the ratio without
+      re-pitching the ramp, and 500 is left alone because it dresses
+      placeholders and disabled controls rather than text that must be read.
+    */
+    --color-neutral-600: #6a6668;
+    --color-neutral-700: #5f5b5c;
+    --color-neutral-800: #434041;
+    --color-neutral-900: #2c2a2a;
+
+    /* Accent ramp */
+    --color-accent-100:  #fdf1ef;
+    --color-accent-200:  #fadfdb;
+    --color-accent-300:  #f3bcb5;
+    --color-accent-400:  #e98f86;
+    --color-accent-500:  #de584d;
+    --color-accent-600:  #c42a20;
+    --color-accent-700:  #a2211a;
+    --color-accent-800:  #7c1913;
+    --color-accent-900:  #55110c;
+
+    /* Accent-2 ramp */
+    --color-accent-2-100: #fdf1ef;
+    --color-accent-2-300: #f3bcb5;
+    --color-accent-2-600: #c4746c;
+    --color-accent-2-700: #a2211a;
+    --color-accent-2-800: #7c1913;
+    --color-accent-2-900: #55110c;
+
+    /* Per-value tone colors */
+    --value-adaptable:     #2a6ea8;
+    --value-transparent:   #5b6b78;
+    --value-collaborative: #be3a66;
+    --value-innovative:    #a25a0b;
+    --value-accountable:   #c42a20;
+
+    /* ------------------------------------------------------------
+       Muted text.
+
+       --color-neutral-600 is the ramp step; this is the SEMANTIC name for
+       "secondary text", so a contrast fix lands in one place rather than in
+       every component that happens to want grey words. Anything carrying
+       meaning at 10-13px uses this or darker — see the contrast note on the
+       neutral ramp above.
+       ------------------------------------------------------------ */
+    --color-text-muted:  #6a6668;
+    --color-text-subtle: #5f5b5c;
+
+    /* ------------------------------------------------------------
+       MOTION
+       Three durations, one easing. The language is drafting: things draw,
+       reveal and settle. Nothing springs, bounces or overshoots, so there is
+       deliberately no spring curve here to reach for.
+       ------------------------------------------------------------ */
+    --motion-fast: 120ms;   /* hover, focus, tint changes */
+    --motion-base: 240ms;   /* section entrance, reveals */
+    --motion-draw: 640ms;   /* a value settling into place */
+    --ease-draw: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    /* Elevation — used sparingly; the blueprint frame carries most structure */
+    --elev-raised: 0 2px 8px rgba(22, 22, 26, 0.08);
+
+    /* Accent emphasis tints, named so the mix ratio is not retyped */
+    --accent-soft:     color-mix(in srgb, var(--color-accent) 8%,  transparent);
+    --accent-emphasis: color-mix(in srgb, var(--color-accent) 14%, transparent);
+
+    /* Spacing scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 28px;
+    --space-8: 32px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+
+    /* shadcn/ui CSS variable bridge */
+    --background:  244 242 242;
+    --foreground:  22 22 26;
+    --border:      234 231 231;
+    --input:       234 231 231;
+    --ring:        196 42 32;
+    --primary:     196 42 32;
+    --primary-foreground: 255 255 255;
+    --secondary:   235 233 233;
+    --secondary-foreground: 22 22 26;
+    --muted:       235 233 233;
+    --muted-foreground: 106 102 104;
+    --accent:      235 233 233;
+    --accent-foreground: 22 22 26;
+    --destructive: 176 26 20;
+    --destructive-foreground: 255 255 255;
+    --card:        235 233 233;
+    --card-foreground: 22 22 26;
+    --popover:     244 242 242;
+    --popover-foreground: 22 22 26;
+    --radius: 0rem;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-color: var(--color-divider);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Barlow', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 400;
+  }
+
+  /* Heading base — Barlow Condensed throughout */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--color-text);
+    line-height: 1.15;
+  }
+
+  h6 {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+  }
+
+  button {
+    font-family: 'Barlow', system-ui, sans-serif;
+    cursor: pointer;
+  }
+
+  input, textarea, select {
+    font-family: 'Barlow', system-ui, sans-serif;
+    font-size: 15px;
+  }
+
+  /* Focus style — single consistent ring */
+  *:focus-visible {
+    outline: 1.5px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar        { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--color-neutral-400); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-neutral-500); }
+}
+
+@layer components {
+  /* ============================================================
+     THE AUTH BRAND PANEL
+
+     The one surface in the light system that IS the logo: black ground,
+     red rule, chrome type. Sign-in and sign-up each render their own
+     content into it — a Core Values list, a help note — and both were
+     written against the light ramp, so the ramp is inverted here instead
+     of asking either screen to know what it is sitting on.
+
+     On black the pale steps carry what the dark steps carry on white,
+     which is why 300 becomes chrome and 700/800 become white veils rather
+     than deep reds: a 60% mix of #7c1913 on black is a maroon slab, and
+     the panel filled with them read as a wall of red rather than as the
+     mark it is meant to echo.
+     ============================================================ */
+  [data-vs-brand-panel] {
+    --color-bg:      #0b0b0b;
+    --color-surface: rgba(255, 255, 255, 0.05);
+    --color-text:    #ffffff;
+    --color-divider: rgba(255, 255, 255, 0.10);
+
+    --color-accent-300:  #b3c0cc;                   /* body copy */
+    --color-accent-400:  #ff6f62;                   /* small red type */
+    --color-accent-700:  rgba(255, 255, 255, 0.18); /* card edges */
+    --color-accent-800:  rgba(255, 255, 255, 0.09); /* card fills */
+    --color-neutral-600: #9a9a9e;
+  }
+
+  /* ============================================================
+     BLUEPRINT FRAME SYSTEM
+     The cornerstone visual element. Every "card" in this design
+     has 4 registration corner marks (+) that extend 6px outside.
+     ============================================================ */
+
+  /* Wrapper that enables overflow-visible for corners */
+  .bp {
+    position: relative;
+  }
+
+  /* Corner marks — generated via pseudo-elements on <i> tags OR
+     using the .bp class with its own corners */
+  .bp::before,
+  .bp::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Blueprint corner marks as child <i> elements */
+  .corner {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .corner::before,
+  .corner::after {
+    content: '';
+    position: absolute;
+    background: rgba(22, 22, 26, 0.45);
+  }
+
+  /* Horizontal bar of crosshair */
+  .corner::before {
+    width: 10px;
+    height: 1px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+
+  /* Vertical bar of crosshair */
+  .corner::after {
+    width: 1px;
+    height: 10px;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+  }
+
+  /* Positions — 6px outside box corners */
+  .corner.tl { top: -6px;    left: -6px; }
+  .corner.tr { top: -6px;    right: -6px; }
+  .corner.bl { bottom: -6px; left: -6px; }
+  .corner.br { bottom: -6px; right: -6px; }
+
+  /* Blueprint card container — transparent bg, 1px divider border, square */
+  .vs-card {
+    position: relative;
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    overflow: visible;
+  }
+
+  /* Filled surface card (for dialogs, sidebar etc.) */
+  .vs-card-filled {
+    position: relative;
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    overflow: visible;
+  }
+
+  /* ============================================================
+     BUTTONS
+     ============================================================ */
+  .vs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    padding: 7px 14px;
+    border: 1px solid var(--color-divider);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 120ms, color 120ms, border-color 120ms;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
+  }
+
+  .vs-btn:hover {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-color: var(--color-accent-400);
+    color: var(--color-accent-800);
+  }
+
+  .vs-btn:focus-visible {
+    outline: 1.5px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .vs-btn:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Primary — filled accent */
+  .vs-btn-primary {
+    background: var(--color-accent);
+    color: var(--color-on-accent, var(--color-bg));
+    border-color: var(--color-accent);
+    position: relative;
+  }
+
+  .vs-btn-primary:hover {
+    background: var(--color-accent-700);
+    border-color: var(--color-accent-700);
+    color: var(--color-on-accent, var(--color-bg));
+  }
+
+  /* Ghost — minimal */
+  .vs-btn-ghost {
+    border-color: transparent;
+    color: var(--color-accent-700);
+  }
+
+  .vs-btn-ghost:hover {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    border-color: transparent;
+    color: var(--color-accent-800);
+  }
+
+  /* Icon button */
+  .vs-btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-divider);
+    background: transparent;
+    cursor: pointer;
+    color: var(--color-neutral-600);
+    transition: background 120ms, color 120ms;
+  }
+
+  .vs-btn-icon:hover {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    color: var(--color-accent-700);
+  }
+
+  /* A row in the notification centre. Hover lives here, not in JS handlers
+     that wrote the colour onto the element: React never knew about those
+     writes, so a row read while under the pointer kept its stale colour. */
+  .vs-notif-item {
+    background: transparent;
+    transition: background 120ms;
+  }
+
+  .vs-notif-item.is-unread {
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  }
+
+  .vs-notif-item:hover,
+  .vs-notif-item:focus-visible {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  /* ============================================================
+     INPUTS
+     ============================================================ */
+  .vs-input {
+    display: block;
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    color: var(--color-text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+    caret-color: var(--color-accent);
+    transition: border-color 120ms;
+  }
+
+  .vs-input::placeholder {
+    color: var(--color-neutral-500);
+  }
+
+  .vs-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .vs-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  textarea.vs-input {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  /* ============================================================
+     TAGS
+     ============================================================ */
+  .vs-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 3px 8px;
+    white-space: nowrap;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  /* Accent (approved, Core Value names) */
+  .vs-tag-accent {
+    background: var(--color-accent-100);
+    color: var(--color-accent-800);
+  }
+
+  /* Neutral (metadata, pending) */
+  .vs-tag-neutral {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-800);
+  }
+
+  /* Outline (behaviour, declined) */
+  .vs-tag-outline {
+    background: transparent;
+    border: 1px solid var(--color-accent-400);
+    color: var(--color-accent-700);
+  }
+
+  /* ============================================================
+     SEGMENTED CONTROL
+     ============================================================ */
+  .vs-seg {
+    display: inline-flex;
+    border: 1px solid var(--color-divider);
+    overflow: hidden;
+  }
+
+  .vs-seg label {
+    display: block;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-neutral-600);
+    cursor: pointer;
+    user-select: none;
+    transition: background 120ms, color 120ms;
+    border-right: 1px solid var(--color-divider);
+    white-space: nowrap;
+  }
+
+  .vs-seg label:last-child {
+    border-right: none;
+  }
+
+  .vs-seg input:checked + label,
+  .vs-seg label.active {
+    background: var(--color-accent);
+    color: var(--color-on-accent, var(--color-bg));
+  }
+
+  .vs-seg input[type='radio'] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* ============================================================
+     TABLE
+     ============================================================ */
+  .vs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .vs-table th {
+    font-family: 'Barlow', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-neutral-600);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-divider);
+    white-space: nowrap;
+  }
+
+  .vs-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-divider);
+    color: var(--color-text);
+    vertical-align: middle;
+  }
+
+  .vs-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .vs-table tr:hover td {
+    background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+  }
+
+  /* ============================================================
+     NAVIGATION (sidebar nav items)
+     ============================================================ */
+  .vs-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-neutral-600);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 120ms, color 120ms;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .vs-nav-item:hover {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    color: var(--color-text);
+  }
+
+  .vs-nav-item.active {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent-800);
+    border-left: 2px solid var(--color-accent);
+  }
+
+  /* ============================================================
+     AVATAR TILE (square initials — never circular)
+     ============================================================ */
+  .vs-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    color: var(--color-accent-800);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--color-divider);
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .vs-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ============================================================
+     SELECTABLE PICK CARDS (wizard step options)
+     ============================================================ */
+  .vs-pick {
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms;
+    text-align: left;
+    width: 100%;
+    position: relative;
+  }
+
+  .vs-pick:hover {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-color: var(--color-accent-400);
+  }
+
+  .vs-pick[data-selected='true'],
+  .vs-pick.selected {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: var(--color-accent);
+  }
+
+  /* ============================================================
+     SECTION HEADER PATTERN
+     ============================================================ */
+  .vs-section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-bottom: 1px solid var(--color-divider);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  /* ============================================================
+     KICKER (small uppercase label above headings)
+     ============================================================ */
+  .vs-kicker {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent-700);
+    font-family: 'Barlow', sans-serif;
+  }
+
+  /* ============================================================
+     METRIC VALUE (large condensed numbers)
+     ============================================================ */
+  .vs-metric-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1;
+    color: var(--color-text);
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============================================================
+     PROGRESS BAR (no radius, no animation)
+     ============================================================ */
+  .vs-progress-track {
+    background: var(--color-neutral-300);
+    height: 4px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .vs-progress-fill {
+    height: 100%;
+    background: var(--color-accent);
+    transition: width 300ms ease-out;
+  }
+
+  /* ============================================================
+     RECOGNITION STORY QUOTE
+     The human sentence inside the technical frame. A thin accent rule
+     rather than quotation marks doing the work, and upright rather than
+     italic — this is somebody's account of what happened, not an aside.
+     ============================================================ */
+  .vs-quote {
+    border-left: 2px solid var(--color-accent);
+    padding-left: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text);
+    font-style: normal;
+  }
+
+  .vs-quote-sm {
+    border-left: 2px solid var(--color-accent);
+    padding-left: 10px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--color-text);
+  }
+
+  /* ============================================================
+     INTERACTIVE BLUEPRINT CARD
+     Hover reveals the registration marks rather than lifting the card.
+     The frame reacts; the box does not move.
+     ============================================================ */
+  .vs-card-interactive {
+    transition:
+      border-color var(--motion-fast) linear,
+      background    var(--motion-fast) linear;
+  }
+
+  .vs-card-interactive:hover {
+    border-color: var(--color-accent-400);
+    background: var(--accent-soft);
+  }
+
+  .vs-card-interactive .corner::before,
+  .vs-card-interactive .corner::after {
+    opacity: 0;
+    transition: opacity var(--motion-fast) linear;
+  }
+
+  .vs-card-interactive:hover .corner::before,
+  .vs-card-interactive:hover .corner::after,
+  .vs-card-interactive:focus-visible .corner::before,
+  .vs-card-interactive:focus-visible .corner::after {
+    opacity: 1;
+  }
+
+  /* ============================================================
+     HAIRLINE MEASURE BAR
+     Used where a count is plotted against a threshold. Taller than
+     .vs-progress-track and drawn on a ruled ground, so a zero-length bar
+     still reads as "measured at zero" rather than as missing.
+     ============================================================ */
+  .vs-measure {
+    position: relative;
+    height: 6px;
+    width: 100%;
+    background: var(--color-neutral-300);
+    overflow: hidden;
+  }
+
+  .vs-measure-fill {
+    height: 100%;
+    background: var(--color-accent);
+    transition: width var(--motion-draw) var(--ease-draw);
+  }
+
+  /* ============================================================
+     APP MAIN / PAGE PADDING
+     One place that decides the page gutter. 32px on a desktop wastes 64px
+     of a 360px phone, so it steps down rather than staying fixed.
+     ============================================================ */
+  .vs-app-main {
+    padding: 28px 32px 64px;
+  }
+
+  @media (max-width: 640px) {
+    .vs-app-main {
+      padding: 20px 16px 48px;
+    }
+  }
+
+  /* ============================================================
+     DIALOG / OVERLAY
+     ============================================================ */
+  .vs-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
+    display: grid;
+    place-items: center;
+    z-index: 100;
+    padding: 16px;
+  }
+
+  .vs-dialog {
+    width: min(480px, 100%);
+    background: var(--color-bg);
+    border: 1px solid var(--color-divider);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    /* Never taller than the window. The backdrop centres its child, so a
+       dialog taller than the viewport overflowed above and below it with no
+       way to scroll — the header, and its close button, sat off-screen.
+       Capped, a long form scrolls inside the dialog instead. */
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+
+  /* Several dialogs set an inline min-width (420-440px) to keep two-column
+     forms from collapsing on a desktop. On a 360px phone that floor is wider
+     than the viewport, and min-width beats max-width in CSS, so the width
+     above cannot rein it in — the page scrolls sideways and the dialog edge
+     is cut off. Inline styles only lose to !important, which is why it is
+     used here. Above this breakpoint the inline floors still apply. */
+  @media (max-width: 520px) {
+    .vs-dialog {
+      min-width: 0 !important;
+    }
+  }
+
+  /* ============================================================
+     PAGE LAYOUT UTILITIES
+     ============================================================ */
+  .vs-page {
+    /* See the keyframes note in tailwind.config.ts: this ends at
+       transform: none so it does not become a containing block for the
+       fixed-position modal backdrops rendered inside a page. */
+    animation: vs-rise 260ms ease-out both;
+  }
+
+  .vs-content {
+    max-width: 1220px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 32px 64px;
+  }
+
+  /* Same gutter step-down as .vs-app-main, for pages that use this wrapper. */
+  @media (max-width: 640px) {
+    .vs-content {
+      padding: 20px 16px 48px;
+    }
+  }
+
+  /* ============================================================
+     SKIP LINK
+     ============================================================ */
+  /*
+    Hidden until focused — and it has to be ACTUALLY hidden.
+
+    This sat at `top: 16px` with `translateY(-100%)`. Shifting up by its own
+    height from 16px leaves its bottom edge at +16px, so a 16px band of
+    `--color-accent` was painted across the top-left of every page: the stray
+    blue bar. It was always there; a light canvas just hid it better than a
+    dark one does.
+
+    Anchoring at `top: 0` means the same shift lands the bottom edge exactly on
+    0. `left` is applied on focus rather than permanently, so nothing is
+    painted outside the layout at any point.
+  */
+  .skip-link {
+    /*
+      Fixed, not absolute: a skip link belongs to the viewport, and this way
+      no ancestor's positioning context can change where it lands.
+    */
+    position: fixed;
+    left: 16px;
+    top: 0;
+    z-index: 200;
+    padding: 8px 16px;
+    background: var(--color-accent);
+    color: var(--color-on-accent, var(--color-bg));
+    font-size: 14px;
+    font-weight: 600;
+    /* -100% alone leaves a sub-pixel sliver on the top edge at some zoom
+       levels and device ratios; the extra 6px guarantees clearance. */
+    transform: translateY(calc(-100% - 6px));
+    transition: transform 200ms;
+  }
+
+  /* Comes to rest 12px below the top edge, not flush against it. */
+  .skip-link:focus {
+    transform: translateY(12px);
+  }
+
+  /* ============================================================
+     BADGE SVG SYSTEM (additive blueprint diagrams)
+     Level icons use stroke, no fill, additive geometry
+     ============================================================ */
+  .vs-badge-icon {
+    display: inline-block;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.2;
+  }
+}
+
+@layer utilities {
+  /* Line clamp */
+  .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+  .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .text-balance  { text-wrap: balance; }
+
+  /* Font utilities */
+  .font-condensed {
+    font-family: 'Barlow Condensed', 'Barlow', sans-serif;
+  }
+
+  /* Accent color helpers */
+  .text-accent        { color: var(--color-accent); }
+  .text-accent-dark   { color: var(--color-accent-800); }
+  .text-muted-vs      { color: var(--color-neutral-600); }
+  .bg-accent-soft     { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  .border-divider     { border-color: var(--color-divider); }
+
+  /* Tabular numbers */
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+}
+
+/* ============================================================
+   KEYFRAMES
+
+   Deliberately OUTSIDE @layer. Tailwind only emits the contents of a layer
+   when something references it, and a raw `animation: pulse ...` in a style
+   attribute is not a class reference — which is exactly how `pulse` came to
+   be missing from the built stylesheet while every skeleton in the app asked
+   for it by name. At the top level it is passed through verbatim.
+   ============================================================ */
+
+/*
+  Skeleton breathing. Opacity only — no scale, no shimmer sweep. A loading
+  placeholder should say "not yet", quietly, and never draw more attention
+  than the content it stands in for.
+*/
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+/* ============================================================
+   REDUCED MOTION
+
+   The contract: motion is removed, INFORMATION IS NOT. Everything here
+   collapses duration rather than setting `animation: none`, because several
+   of these animations run with fill-mode `both` and begin at opacity 0 —
+   cancelling them outright would leave the content permanently invisible,
+   which is a worse outcome for the people this query exists to serve.
+
+   `transition` is included for the same reason a progress bar animates its
+   width: with motion reduced the bar must still ARRIVE at its value, it
+   just arrives immediately.
+   ============================================================ */
+/* ============================================================
+   BAR LOADER — four bars breathing in sequence
+   ============================================================
+
+   Sits beside a line of "working on it" text. Bar size, gap, colour and
+   timing as designed; the box is sized to the bars at full stretch
+   (23px × 1.8 ≈ 42px) rather than a fixed 100px square, so it lines up
+   with one line of text instead of making the row 100px tall.
+
+   The keyframes carry a vs- prefix: a bare `grow` is the kind of name a
+   library or a later stylesheet also picks, and the last one loaded would
+   silently win. Reduced motion is handled by the block below — the loader
+   is aria-hidden, so its bars stand still. */
+.vs-bar-loader {
+  --gap: 5px;
+  --clr: #d62d20;
+  --height: 23px;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  height: calc(var(--height) * 1.8);
+}
+
+.vs-bar-loader span {
+  background: var(--clr);
+  width: 6px;
+  height: var(--height);
+  animation: vs-bar-grow 1s ease-in-out infinite;
+}
+
+.vs-bar-loader span:nth-child(2) { animation-delay: 0.15s; }
+.vs-bar-loader span:nth-child(3) { animation-delay: 0.3s; }
+.vs-bar-loader span:nth-child(4) { animation-delay: 0.475s; }
+
+@keyframes vs-bar-grow {
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(1.8); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /*
+    The skeleton pulse is the one place where stopping outright is correct:
+    it is decorative, it repeats forever, and `aria-busy` already carries the
+    meaning to anyone who is not watching it.
+  */
+  [aria-hidden='true'] {
+    animation: none !important;
+  }
+}

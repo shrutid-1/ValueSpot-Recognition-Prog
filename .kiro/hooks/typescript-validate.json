@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "TypeScript Validation on Save",
+      "trigger": "PostFileSave",
+      "description": "Run TypeScript type checking after saving any .ts or .tsx file to catch type errors early",
+      "matcher": "\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "cd \"C:\\Users\\Shruti D\\Core Value Recognition\" && npx tsc --noEmit 2>&1 | head -20",
+        "timeout": 30
+      }
+    }
+  ]
+}

@@ -1,0 +1,729 @@
+/* ============================================================================
+   AUTH — sign in, create account, the emailed code, reset password
+   ============================================================================
+
+   One look for the four screens: a quiet grey panel, the logo above a large
+   plain title, bold small labels, white fields with an icon at the left, and
+   a single solid black button. Links sit under the button, left-aligned.
+
+   Everything is scoped to `.au-scope`, so none of it reaches the app behind
+   the sign-in. The frame (`.au-shell`) pairs the form with the dark brand
+   panel from `lg` up; below that the form is the whole page.
+   ========================================================================= */
+
+.au-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: #F4F4F5;
+}
+
+@media (min-width: 1024px) {
+  /* Brand panel on the left, form on the right. The swap is visual only:
+     the form stays first in the DOM, so tab and reading order start there. */
+  .au-shell { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  .au-brand-panel { order: -1; }
+}
+
+.au-scope {
+  --au-bg:          #F4F4F5;
+  --au-ink:         #111113;
+  --au-ink-2:       #3F3F46;
+  --au-muted:       #71717A;
+  --au-faint:       #A1A1AA;
+  --au-field:       #FFFFFF;
+  --au-line:        #E4E4E7;
+  --au-focus:       #111113;
+  --au-danger:      #C42A20;
+  --au-danger-soft: #FDF1EF;
+  --au-radius:      12px;
+
+  background: var(--au-bg);
+  color: var(--au-ink);
+  font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.au-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.au-column {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ---- Brand ---------------------------------------------------------------- */
+
+.au-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.au-brand-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--au-muted);
+}
+
+/* The dark panel beside the form. Its tokens come from [data-vs-brand-panel]
+   in globals.css; only the layout lives here. */
+.au-brand-panel {
+  display: none;
+  position: relative;
+  /* clip, not hidden: hidden would make this a scroll container and stop
+     .au-brand-inner sticking to the viewport. */
+  overflow: clip;
+  background: #0B0B0B;
+}
+
+@media (min-width: 1024px) {
+  .au-brand-panel { display: block; }
+}
+
+.au-brand-inner {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: clamp(48px, 5vw, 88px);
+}
+
+/* The Touchcore wordmark, below its native 197px (never above: the PNG is
+   small and would soften). Negative margins pull it out of the panel padding
+   toward the top-left corner; the headline below keeps its place. */
+.au-brand-company {
+  --au-company-pull: clamp(24px, 2.5vw, 44px);
+  display: block;
+  width: 220px;
+  height: auto;
+  margin: calc(var(--au-company-pull) * -1) 0 clamp(40px, 5vh, 64px) calc(var(--au-company-pull) * -1);
+}
+
+.au-brand-headline {
+  font-size: clamp(40px, 3.4vw, 64px);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: #f5f5f8;
+  max-width: 720px;
+}
+
+.au-brand-intro {
+  margin-top: 20px;
+  max-width: 480px;
+  font-size: clamp(16px, 1.1vw, 20px);
+  line-height: 1.55;
+  color: var(--color-accent-300);
+}
+
+/* The shared 10px kicker is sized for dense app screens; here it heads a
+   whole panel. */
+.au-brand-panel .vs-kicker {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+/* Numbered steps in the brand panel (sign-up). */
+.au-steps {
+  max-width: 600px;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.au-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  padding: 18px 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.au-step-num {
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+  font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #ff6f62;
+}
+
+.au-step-title {
+  font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f5f5f8;
+}
+
+.au-step-text {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-accent-300);
+}
+
+.au-aside-note {
+  margin-top: 24px;
+  max-width: 480px;
+  padding-left: 14px;
+  border-left: 2px solid #ff6f62;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-accent-300);
+}
+
+/* ---- Core Value spotlight (sign-in brand panel) --------------------------
+   `--tone` is the featured value's colour, `--seg-tone` each segment's. The
+   tones are mid-dark, so type mixes them toward white to stay legible here. */
+
+.au-spot { max-width: 600px; }
+
+.au-spot-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.au-spot-count {
+  font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.35);
+}
+.au-spot-count span { color: #f5f5f8; }
+
+.au-spot-feature {
+  position: relative;
+  min-height: 150px;
+  padding: 4px 0 28px;
+  animation: au-spot-in 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* The "spot": a soft light in the value's colour behind its name. */
+.au-spot-glow {
+  position: absolute;
+  left: -120px;
+  top: -90px;
+  width: 440px;
+  height: 300px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--tone) 45%, transparent), transparent);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.au-spot-name {
+  position: relative;
+  font-size: clamp(48px, 4.4vw, 80px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: #f5f5f8;
+}
+.au-spot-name::after {
+  content: '.';
+  color: color-mix(in srgb, var(--tone) 70%, white);
+}
+
+.au-spot-def {
+  position: relative;
+  margin-top: 14px;
+  max-width: 440px;
+  font-size: clamp(15px, 1.05vw, 18px);
+  line-height: 1.55;
+  color: var(--color-accent-300);
+}
+
+.au-spot-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.au-spot-seg {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 4px;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.au-spot-bar {
+  position: relative;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--seg-tone) 45%, rgba(255, 255, 255, 0.08));
+}
+
+.au-spot-fill {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--seg-tone) 75%, white);
+  transform-origin: left;
+  animation: au-spot-fill 5s linear both;
+}
+
+.au-spot-label {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 160ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.au-spot-seg:hover .au-spot-label { color: rgba(255, 255, 255, 0.75); }
+.au-spot-seg[aria-pressed='true'] .au-spot-label { color: #f5f5f8; }
+
+.au-spot-seg:focus-visible { outline: none; }
+.au-spot-seg:focus-visible .au-spot-label {
+  color: #f5f5f8;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Reading or choosing holds the spotlight where it is. */
+.au-spot-strip:hover .au-spot-fill,
+.au-spot-strip:focus-within .au-spot-fill {
+  animation-play-state: paused;
+}
+
+@keyframes au-spot-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes au-spot-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* No animation means no animationend, so the rotation stops too: the
+   spotlight moves only when someone picks a value. */
+@media (prefers-reduced-motion: reduce) {
+  .au-spot-feature { animation: none; }
+  .au-spot-fill { animation: none; transform: none; }
+}
+
+/* The red rule, at the edge of visible — the logo's own red. */
+.au-brand-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#e3352b 1px, transparent 1px),
+    linear-gradient(90deg, #e3352b 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+/* ---- Heading -------------------------------------------------------------- */
+
+.au-head { margin-bottom: 28px; }
+
+.au-kicker {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--au-muted);
+}
+
+.au-title {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--au-ink);
+}
+
+.au-subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--au-muted);
+}
+
+/* ---- Fields --------------------------------------------------------------- */
+
+.au-form { display: block; }
+
+.au-field { margin-bottom: 18px; }
+
+.au-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--au-ink);
+}
+
+.au-input-wrap { position: relative; }
+
+.au-scope .au-input,
+.au-scope .vs-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--au-line);
+  border-radius: var(--au-radius);
+  background: var(--au-field);
+  color: var(--au-ink);
+  font-family: inherit;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(17, 17, 19, 0.04);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.au-scope .au-input::placeholder,
+.au-scope .vs-input::placeholder { color: var(--au-faint); }
+
+/* Focus is shown by the field's own edge — a dark border and a soft halo —
+   never by a coloured outline ring. */
+.au-scope .au-input:focus,
+.au-scope .vs-input:focus,
+.au-scope .au-input:focus-visible,
+.au-scope .vs-input:focus-visible {
+  outline: none;
+  border-color: var(--au-focus);
+  box-shadow: 0 0 0 3px rgba(17, 17, 19, 0.08);
+}
+
+.au-scope .au-input[aria-invalid='true'],
+.au-scope .vs-input[aria-invalid='true'] {
+  border-color: var(--au-danger);
+}
+
+.au-scope .au-input:disabled,
+.au-scope .vs-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.au-scope .au-has-icon { padding-left: 44px; }
+.au-scope .au-has-toggle { padding-right: 46px; }
+
+/* Selects keep the native control but take the field's shape. */
+.au-scope select.vs-input,
+.au-scope select.au-input {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  cursor: pointer;
+}
+
+.au-input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--au-ink-2);
+  pointer-events: none;
+}
+
+.au-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--au-muted);
+  cursor: pointer;
+}
+
+.au-toggle:hover { color: var(--au-ink); background: #F4F4F5; }
+.au-toggle:focus-visible { outline: 2px solid var(--au-focus); outline-offset: 1px; }
+
+/* The one-time code: a single wide field, spaced digits. */
+.au-scope .au-code {
+  height: 56px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  font-variant-numeric: tabular-nums;
+}
+
+.au-error { font-weight: 500; }
+
+/* ---- Remember me ---------------------------------------------------------- */
+
+.au-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--au-ink);
+  cursor: pointer;
+  user-select: none;
+}
+
+.au-check input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--au-ink);
+  border-radius: 4px;
+  background: var(--au-field);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.au-check input::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border: solid #fff;
+  border-width: 0 0 2px 2px;
+  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transition: transform 120ms ease;
+}
+
+.au-check input:checked { background: var(--au-ink); }
+.au-check input:checked::after { transform: translateY(-1px) rotate(-45deg) scale(1); }
+.au-check input:focus-visible { outline: 2px solid var(--au-focus); outline-offset: 2px; }
+
+/* ---- Button --------------------------------------------------------------- */
+
+.au-btn {
+  width: 100%;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--au-radius);
+  background: var(--au-ink);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 140ms ease, transform 80ms ease;
+}
+
+.au-btn:hover { background: #27272A; }
+.au-btn:active { transform: translateY(1px); }
+.au-btn:focus-visible { outline: 2px solid var(--au-focus); outline-offset: 3px; }
+.au-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* A lighter second action, e.g. "Resend code". */
+.au-btn-ghost {
+  background: transparent;
+  color: var(--au-ink);
+  box-shadow: inset 0 0 0 1px var(--au-line);
+}
+
+.au-btn-ghost:hover { background: #fff; }
+
+/* ---- Links under the form ------------------------------------------------- */
+
+.au-links {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--au-muted);
+}
+
+.au-link {
+  color: var(--au-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.au-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.au-link:focus-visible { outline: 2px solid var(--au-focus); outline-offset: 2px; border-radius: 3px; }
+
+.au-foot {
+  margin-top: 36px;
+  font-size: 12px;
+  color: var(--au-faint);
+}
+
+/* A plain button that reads as a link (the code screen's "Use a different email"). */
+.au-link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--au-ink);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.au-link-btn:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
+.au-link-btn:disabled { color: var(--au-faint); cursor: not-allowed; }
+
+/* ---- Messages ------------------------------------------------------------- */
+
+.au-alert {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: var(--au-radius);
+  background: var(--au-danger-soft);
+  border: 1px solid #F3BCB5;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #7C1913;
+}
+
+.au-alert a { color: inherit; font-weight: 600; }
+
+/* A neutral notice, e.g. "You've been invited as a Manager". */
+.au-note {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: var(--au-radius);
+  background: #fff;
+  border: 1px solid var(--au-line);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--au-ink-2);
+}
+
+/* A notice that needs acting on, e.g. "this account becomes the Super Admin". */
+.au-note-accent {
+  background: #FDF1EF;
+  border-color: #F3BCB5;
+  color: #7C1913;
+}
+
+.au-note-accent a { color: inherit; font-weight: 600; text-decoration: underline; }
+
+.au-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: var(--au-radius);
+  background: #E4F2EA;
+  border: 1px solid #BFE0CC;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1E4D34;
+}
+
+/* ---- Portal choice -------------------------------------------------------- */
+
+/* One row of three in a sunken track; the chosen one is lifted out in white. */
+.au-seg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--au-radius);
+  background: #E4E4E7;
+}
+
+.au-seg-option {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--au-ink-2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.au-seg-option:hover:not(:disabled):not([aria-checked='true']) { color: var(--au-ink); background: rgba(255, 255, 255, 0.5); }
+.au-seg-option:focus-visible { outline: 2px solid var(--au-focus); outline-offset: 1px; }
+.au-seg-option:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.au-seg-option[aria-checked='true'] {
+  background: var(--au-field);
+  color: var(--au-ink);
+  box-shadow: 0 1px 2px rgba(17, 17, 19, 0.08), 0 1px 1px rgba(17, 17, 19, 0.04);
+}
+
+/* ---- Password strength ---------------------------------------------------- */
+
+.au-strength { margin: -8px 0 18px; }
+
+.au-strength-bars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.au-strength-bars span {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--au-line);
+  transition: background 160ms ease;
+}
+
+.au-strength-bars span.is-on { background: var(--au-ink); }
+
+/* ---- Leftovers from the old frame ----------------------------------------- */
+
+/* Corner marks belong to the retired card frame. */
+.au-scope .corner { display: none !important; }
+
+/* ---- Narrow screens ------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .au-form-panel { padding: 32px 16px; align-items: flex-start; }
+  .au-brand { margin-bottom: 28px; }
+  .au-title { font-size: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-scope *, .au-scope *::before, .au-scope *::after { transition: none !important; }
+}

@@ -1,0 +1,287 @@
+/* ============================================================================
+   VALUESPOT — LIGHT AND DARK MODES
+   ============================================================================
+
+   Each portal was designed in one mode: the Employee portal dark, the
+   administrative portals (Manager, HR Admin, Super Admin) light. This file
+   adds the other mode to each, switched by the `dark` class on <html>
+   (ToggleTheme flips it; lib/theme.ts remembers the choice per portal).
+
+     Employee portal, `dark` present   → as designed (employee-theme.css)
+     Employee portal, `dark` absent    → EMPLOYEE — LIGHT, below
+     Admin portals,   `dark` absent    → as designed (admin-theme.css)
+     Admin portals,   `dark` present   → ADMIN — DARK, below
+
+   HOW
+   ---
+   Both systems are written against custom properties, so a mode is a second
+   set of values for the same tokens, not a second stylesheet. The Employee
+   portal keeps its `data-vs-theme="dark"` attribute in light mode: three
+   thousand lines of structure are keyed on it, and it names the SYSTEM, not
+   the brightness. Only the handful of literals that could not be tokens are
+   restated here.
+
+   THE ONE RULE THAT MAKES FILLS WORK
+   ----------------------------------
+   The dark systems put LIGHT fills (bright red, chrome, pastel value tones)
+   under near-black labels. The light systems put DEEP fills under white
+   labels. So each mode flips its fills and the label token together:
+   --vsx-on-fill for the Employee components, --color-on-accent for the
+   Blueprint controls. Every pairing below was measured: body text 4.5:1 or
+   better, labels on fills 4.8:1 or better.
+
+   Loaded last, after every stylesheet it adjusts.
+   ========================================================================= */
+
+/* Native controls, scrollbars and form popups follow the page. */
+:root.dark { color-scheme: dark; }
+:root:not(.dark) { color-scheme: light; }
+
+
+/* =========================================================================
+   EMPLOYEE — LIGHT
+   Warm off-white page, white panels, the logo red deepened until it holds
+   AA both as text and under a white label. Same geometry, same type, same
+   meaning for every colour: red received, slate given.
+
+   The :not([data-vs-portal='admin']) keeps this out of the administrative
+   portals, which render a few Employee components in their own palette.
+   ========================================================================= */
+
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'] {
+  --vsx-ink:        #F3F2F0;   /* the page */
+  --vsx-ink-2:      #FFFFFF;   /* a panel */
+  --vsx-ink-3:      #F1EFED;   /* inset, and control hover */
+  --vsx-ink-4:      #E6E3E0;   /* pressed */
+
+  --vsx-rule:       rgba(17, 17, 17, 0.08);
+  --vsx-rule-2:     rgba(17, 17, 17, 0.14);
+  --vsx-rule-3:     rgba(17, 17, 17, 0.26);
+
+  --vsx-text:       #111111;   /* 18.9:1 on a panel */
+  --vsx-text-2:     #555555;   /*  7.5:1 */
+  --vsx-text-3:     #6B6B6B;   /*  5.3:1 on a panel, 4.8:1 on the page */
+
+  --vsx-red:        #C42A20;   /* 5.7:1 as text; white on it 5.7:1 */
+  --vsx-red-hi:     #A2211A;
+  --vsx-red-dim:    rgba(196, 42, 32, 0.10);
+
+  --vsx-silver:     #4E6070;   /* "given": 6.5:1 either way round */
+  --vsx-silver-hi:  #3B4A57;
+  --vsx-silver-dim: rgba(78, 96, 112, 0.12);
+
+  --vsx-danger:     #B3123C;
+  --vsx-wait:       #8A5A06;
+
+  /* The deep marks the administrative portals already use — each takes a
+     white label at 5.2:1 or better, which is how a value is most often shown. */
+  --vsx-v-adaptable:     #2A6EA8;
+  --vsx-v-transparent:   #5B6B78;
+  --vsx-v-collaborative: #BE3A66;
+  --vsx-v-innovative:    #A25A0B;
+  --vsx-v-accountable:   #C42A20;
+  --vsx-v-fallback:      #5B6B78;
+
+  --vsx-on-fill:    #FFFFFF;
+  --vsx-on-red:     #FFFFFF;
+  --vsx-lift:       0 1px 2px rgba(17, 17, 17, 0.04), 0 10px 28px rgba(17, 17, 17, 0.06);
+
+  /* The Blueprint bridge's red tints were mixed from the bright dark-mode red. */
+  --color-accent-200: rgba(196, 42, 32, 0.14);
+  --color-accent-300: rgba(196, 42, 32, 0.24);
+  --color-accent-400: rgba(196, 42, 32, 0.36);
+  --accent-soft:      rgba(196, 42, 32, 0.06);
+  --shadow-md: 0 10px 30px rgba(17, 17, 17, 0.10);
+  --shadow-lg: 0 24px 60px rgba(17, 17, 17, 0.16);
+}
+
+/* The canvas texture, re-inked for a light page: the same wash, lattice and
+   measure, in black at the same edge-of-visible strength. */
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'][data-vs-root] {
+  background-image:
+    radial-gradient(120% 58% at 50% 0%,
+                    rgba(255, 255, 255, 0.85) 0%,
+                    rgba(255, 255, 255, 0) 70%),
+    radial-gradient(rgba(17, 17, 17, 0.07) 1px, transparent 1.7px),
+    linear-gradient(to right,  rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17, 17, 17, 0.025) 1px, transparent 1px);
+}
+
+@media (prefers-contrast: more) {
+  :root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'][data-vs-root] {
+    background-image: none;
+  }
+}
+
+:root:not(.dark):not([data-vs-portal='admin']) .vsx-topbar {
+  background: rgba(243, 242, 240, 0.86);
+}
+
+:root:not(.dark):not([data-vs-portal='admin']) .vsx-month::before {
+  border-left-color: rgba(17, 17, 17, 0.1);
+}
+
+/* Initials on a value pill: a lighter disc now that the pill is deep. */
+:root:not(.dark):not([data-vs-portal='admin']) .vsx-data-pill:not(.vsx-data-pill-quiet) .vsx-avatar {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Floating surfaces: a black-tuned shadow reads as dirt on a light page. */
+:root:not(.dark):not([data-vs-portal='admin']) :is(
+  .vsx-select-menu, .vsx-comment-menu, .vsx-coin-pop, .vsx-chart-tip,
+  .vsx-coin-toast, .vsx-redemption-sheet, .vsx-redeem
+) {
+  box-shadow: 0 16px 40px rgba(17, 17, 17, 0.14), 0 0 0 1px var(--vsx-rule);
+}
+
+:root:not(.dark):not([data-vs-portal='admin']) .vsx-modal-backdrop,
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'] .vs-dialog-backdrop {
+  background: rgba(17, 17, 17, 0.42);
+}
+
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(17, 17, 17, 0.18);
+  background-clip: content-box;
+}
+
+/* Screens that carry both of a value's tones pick the deep one on a light page. */
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'] .vj-toned {
+  --vj-tone: var(--vt-l, var(--vj-ink));
+}
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'] .mr-toned {
+  --mr-tone: var(--vt-l, var(--mr-accent));
+}
+
+:root:not(.dark):not([data-vs-portal='admin']) [data-vs-theme='dark'] .vp-chip-x:hover {
+  background: rgba(17, 17, 17, 0.08);
+}
+
+
+/* =========================================================================
+   ADMIN — DARK
+   Graphite canvas, near-black frame, charcoal panels. The accent follows the
+   Employee portal's dark rule: the logo red lifted until it reads as text
+   (5.6:1), with near-black on it when it is a fill; the primary button keeps
+   a deeper red under a white label (4.9:1). Status colours are lifted the
+   same way, and the value tones become the Employee portal's light marks.
+
+   AppShell sets data-vs-portal on <html> as well as on its own frame, so
+   `:root.dark[data-vs-portal='admin']` reaches the dialogs portalled to
+   <body> too.
+   ========================================================================= */
+
+:root.dark[data-vs-portal='admin'],
+:root.dark [data-vs-portal='admin'] {
+  --ad-a-50:   #2B1614;
+  --ad-a-100:  #3B1B18;
+  --ad-a-200:  #5A2621;
+  --ad-a-300:  #7E3028;
+  --ad-a-400:  #E0574C;
+  --ad-a-500:  #FF5A4E;
+  --ad-a-600:  #D2372C;
+  --ad-a-700:  #FF8F85;
+  --ad-a-800:  #FFB4AC;
+  --ad-a-900:  #FFDAD5;
+
+  --ad-canvas: #0E0E10;
+  --ad-frame:  #151517;
+  --ad-ground: #111113;
+  --ad-panel:  #1B1B1E;
+  --ad-inset:  #222226;
+  --ad-hover:  #29292E;
+
+  --ad-line:   #2A2A2F;
+  --ad-line-2: #36363C;
+
+  --ad-text:   #F2F2F3;   /* 15.4:1 on a panel */
+  --ad-text-2: #A6A6AD;   /*  7.1:1 */
+  --ad-text-3: #94949C;   /*  5.7:1 on a panel, 4.8:1 even on a hovered row */
+
+  --ad-ok:      #5CC98E;
+  --ad-ok-bg:   rgba(92, 201, 142, 0.14);
+  --ad-wait:    #F2B23C;
+  --ad-wait-bg: rgba(242, 178, 60, 0.14);
+  --ad-idle:    #A3AAB5;
+  --ad-idle-bg: rgba(163, 170, 181, 0.14);
+
+  --ad-shadow:    0 1px 2px rgba(0, 0, 0, 0.4);
+  --ad-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --ad-shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.6);
+
+  /* The Blueprint vocabulary. --color-bg is the dark panel here — it is what
+     dialogs, menus and every color-mix() tint are built on — and the label
+     on an accent fill gets its own token instead of borrowing it. */
+  --color-bg:          var(--ad-panel);
+  --color-accent:      var(--ad-a-500);
+  --color-on-accent:   #0B0B0B;
+
+  --color-neutral-100: #1F1F23;
+  --color-neutral-200: #25252A;
+  --color-neutral-300: #2E2E34;
+  --color-neutral-400: #45454C;
+  --color-neutral-500: #6E6E76;
+  --color-neutral-700: #C4C4CA;
+  --color-neutral-800: #DEDEE2;
+  --color-neutral-900: #F2F2F3;
+  --color-text-subtle: #C4C4CA;
+
+  --value-adaptable:     #92B9DB;
+  --value-transparent:   #C9D3DC;
+  --value-collaborative: #F0A0AE;
+  --value-innovative:    #FFC06B;
+  --value-accountable:   #FF8578;
+
+  --ring:    255 90 78;
+  --primary: 210 55 44;
+
+  /* The Employee components inside these portals (the feed). */
+  --vsx-red:        var(--ad-a-500);
+  --vsx-red-hi:     var(--ad-a-700);
+  --vsx-red-dim:    rgba(255, 90, 78, 0.14);
+  --vsx-on-red:     #0B0B0B;
+  --vsx-on-fill:    #0B0B0B;
+  --vsx-rule-3:     #45454C;
+  --vsx-silver:     #B3C0CC;
+  --vsx-silver-hi:  #D4DDE5;
+  --vsx-silver-dim: rgba(179, 192, 204, 0.14);
+  --vsx-danger:     #FF7C93;
+  --vsx-wait:       #F2B23C;
+}
+
+/* The primary button keeps a deep red and a white label; its hover goes
+   deeper, not lighter, so the label never loses contrast. */
+:root.dark[data-vs-portal='admin'] .vs-btn-primary:hover,
+:root.dark[data-vs-portal='admin'] .ad-btn-primary:hover,
+:root.dark[data-vs-portal='admin'] .vsx-btn-primary:hover {
+  background: #B52D23;
+  border-color: #B52D23;
+}
+
+/* The two red cards carry white text on a gradient that ran into the deep
+   end of the scale. In this mode the top of the scale is light (it is for
+   text), so their gradients are pinned to the deep reds directly. */
+:root.dark[data-vs-portal='admin'] .ad-stat-featured {
+  background: linear-gradient(145deg, #C42A20 0%, #7C1913 100%);
+}
+:root.dark[data-vs-portal='admin'] .ad-deep {
+  background: linear-gradient(150deg, #A2211A 0%, #55110C 100%);
+}
+
+:root.dark[data-vs-portal='admin'] ::-webkit-scrollbar-thumb { background: #3A3A40; }
+:root.dark[data-vs-portal='admin'] ::-webkit-scrollbar-thumb:hover { background: #4A4A52; }
+
+:root.dark[data-vs-portal='admin'] .vs-dialog-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* An empty day on the activity band: hatched in the panel's own greys. */
+:root.dark[data-vs-portal='admin'] .ad-band-bar-empty {
+  background: repeating-linear-gradient(135deg, #2A2A2F 0 4px, #1B1B1E 4px 9px);
+}
+
+/* Recharts paints its tooltip white inline. */
+:root.dark[data-vs-portal='admin'] .recharts-default-tooltip {
+  background-color: var(--ad-panel) !important;
+  color: var(--ad-text) !important;
+}
+:root.dark[data-vs-portal='admin'] .recharts-cartesian-grid line { stroke: var(--ad-line); }

@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Database Migration Security Review",
+      "trigger": "PostFileSave",
+      "description": "Verify database migration files follow security and convention requirements when saved",
+      "matcher": "supabase/migrations/.*\\.sql$",
+      "action": {
+        "type": "agent",
+        "prompt": "A database migration file was just saved. Please verify:\n1. Every new table has ROW LEVEL SECURITY enabled (ALTER TABLE ... ENABLE ROW LEVEL SECURITY)\n2. Every new table has RLS policies defined (not just enabled)\n3. No SUPABASE_SERVICE_ROLE_KEY appears in the migration\n4. All timestamp columns use TIMESTAMPTZ (not TIMESTAMP)\n5. All primary keys use UUID DEFAULT gen_random_uuid()\n6. The migration follows the naming conventions in .kiro/steering/database-conventions.md\nReport any violations found."
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "ESLint on Save",
+      "trigger": "PostFileSave",
+      "description": "Run ESLint on saved TypeScript and TypeScript React files to enforce coding standards",
+      "matcher": "\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "cd \"C:\\Users\\Shruti D\\Core Value Recognition\" && npx eslint --max-warnings=0 %file% 2>&1 | head -30",
+        "timeout": 30
+      }
+    }
+  ]
+}

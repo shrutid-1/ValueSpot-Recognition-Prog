@@ -1,0 +1,463 @@
+/* ============================================================================
+   REPORT INSIGHTS — the AI interpretation, laid out for a quick read
+   ============================================================================
+
+   Reports is a Manager / HR / Super Admin screen, so this renders inside the
+   administrative portal. Everything reads the shared --color-* tokens, which
+   that portal re-points, so no colour here is hard-coded to one system.
+
+   One accent hue throughout. The page does not colour numbers as good or bad,
+   so neither does this: cards differ by icon and title, bars are all the one
+   hue, and a change is shown with an arrow in neutral ink.
+   ========================================================================= */
+
+.ri-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ri-muted {
+  font-size: 13px;
+  color: var(--color-neutral-600);
+  line-height: 1.5;
+}
+
+.ri-kicker {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+.ri-kicker-aside {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---- Headline ------------------------------------------------------------ */
+
+.ri-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ri-hero-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--color-accent-100);
+  color: var(--color-accent);
+}
+
+.ri-headline {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+
+.ri-summary {
+  margin: 5px 0 0;
+  max-width: 78ch;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-neutral-600);
+}
+
+.ri-summary strong,
+.ri-list strong,
+.ri-note-text strong,
+.ri-panel-note strong,
+.ri-limits-list strong {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ---- At a glance --------------------------------------------------------- */
+
+.ri-stats {
+  display: grid;
+  /* Four across on a desktop, two by two on a phone — never one per row. */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.ri-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+  background: var(--color-bg);
+}
+
+.ri-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+}
+
+/* Proportional figures: tabular digits look loose at display sizes. */
+.ri-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.ri-spark {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+.ri-stat-label {
+  font-size: 12.5px;
+  color: var(--color-neutral-600);
+  line-height: 1.35;
+}
+
+.ri-stat-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11.5px;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Core values + notes -------------------------------------------------- */
+
+.ri-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.ri-panel {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+}
+
+.ri-panel-note {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-divider);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-neutral-700);
+}
+
+.ri-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ri-bar-row {
+  display: grid;
+  grid-template-columns: minmax(84px, 128px) minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 10px;
+}
+
+.ri-bar-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ri-bar-track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-neutral-100);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  overflow: hidden;
+}
+
+.ri-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+.ri-bar-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ri-bar-none {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-neutral-500);
+}
+
+.ri-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ri-note-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+}
+
+/* The first note stands on its own; the badges note shares a box with its chips. */
+.ri-notes > .ri-note {
+  padding: 12px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+}
+
+.ri-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ri-note-icon {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+}
+
+.ri-note-title {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ri-note-text {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-neutral-700);
+}
+
+.ri-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0 0 36px;
+  list-style: none;
+}
+
+.ri-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ri-badge-level {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+/* ---- The three cards ------------------------------------------------------ */
+
+.ri-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ri-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--color-neutral-100);
+}
+
+.ri-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ri-card-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+}
+
+.ri-card-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ri-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ri-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-neutral-700);
+}
+
+/* A dot for plain lists… */
+.ri-list-mark {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+/* …and a numbered step for next steps. */
+.ri-list-numbered .ri-list-mark {
+  width: 20px;
+  height: 20px;
+  margin-top: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ri-more {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ri-more:hover { text-decoration: underline; }
+
+/* ---- Keep in mind ----------------------------------------------------------- */
+
+.ri-limits {
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+}
+
+.ri-limits-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  color: var(--color-neutral-700);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ri-limits-toggle span { flex: 1; }
+
+.ri-limits-chevron { transition: transform 150ms ease; }
+.ri-limits-chevron[data-open] { transform: rotate(180deg); }
+
+.ri-limits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0 14px 12px 36px;
+  list-style: disc;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-neutral-700);
+}
+
+/* ---- Narrow screens -------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .ri-cards { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .ri-split { grid-template-columns: minmax(0, 1fr); }
+  .ri-headline { font-size: 17px; }
+  .ri-badges { padding-left: 0; }
+  .ri-stat-value { font-size: 24px; }
+  /* Give the bars the width: the name column shrinks, the track grows. */
+  .ri-bar-row { grid-template-columns: minmax(64px, 96px) minmax(0, 1fr) auto; gap: 8px; }
+  .ri-spark { width: 64px; }
+}

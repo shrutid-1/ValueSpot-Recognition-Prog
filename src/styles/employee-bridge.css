@@ -1,0 +1,291 @@
+/* ============================================================================
+   LEGACY TOKEN BRIDGE — Employee portal
+   ============================================================================
+
+   The Employee portal is more than the dashboard: the recognition wizard, the
+   feed, My Recognitions, the Core Value journey, Support, Profile and the
+   notification centre are all written against the light Blueprint tokens.
+
+   Rather than leave them in a second visual language, the light tokens are
+   re-pointed at the panel system inside this scope, and the handful of
+   structural classes (.vs-card, .vs-btn, .vs-input, .vs-tag) are re-shaped to
+   match it: filled panels with a 22px radius, pill controls, pill tags.
+   Those screens come out dark, rounded and in the right faces without being
+   rewritten component by component.
+
+   HR and Manager never set data-vs-theme, so none of this reaches them.
+
+   The Tailwind utilities at the end need explicit overrides: their values are
+   compiled hex, so re-pointing a custom property cannot reach them.
+   ========================================================================= */
+
+[data-vs-theme='dark'] {
+  --color-bg:       var(--vsx-ink);
+  --color-surface:  var(--vsx-ink-2);
+  --color-text:     var(--vsx-text);
+  --color-accent:   var(--vsx-red);
+  --color-accent-2: var(--vsx-red-hi);
+  --color-divider:  var(--vsx-rule);
+
+  --color-neutral-100: var(--vsx-ink-2);
+  --color-neutral-200: var(--vsx-ink-2);
+  --color-neutral-300: var(--vsx-ink-3);
+  --color-neutral-400: var(--vsx-ink-4);
+  --color-neutral-500: var(--vsx-text-3);
+  --color-neutral-600: var(--vsx-text-2);
+  --color-neutral-700: var(--vsx-text-2);
+  --color-neutral-800: var(--vsx-text);
+  --color-neutral-900: var(--vsx-text);
+
+  --color-accent-100: var(--vsx-red-dim);
+  --color-accent-200: rgba(255, 74, 61, 0.20);
+  --color-accent-300: rgba(255, 74, 61, 0.30);
+  --color-accent-400: rgba(255, 74, 61, 0.42);
+  --color-accent-500: var(--vsx-red);
+  --color-accent-600: var(--vsx-red);
+  --color-accent-700: var(--vsx-red-hi);
+  --color-accent-800: var(--vsx-red-hi);
+  --color-accent-900: var(--vsx-text);
+
+  --color-text-muted:  var(--vsx-text-2);
+  --color-text-subtle: var(--vsx-text-2);
+  --accent-soft:       rgba(255, 74, 61, 0.08);
+  --accent-emphasis:   var(--vsx-red-dim);
+
+  --shadow-sm: none;
+  --shadow-md: 0 10px 34px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.62);
+}
+
+/*
+  A legacy box becomes a panel. This single rule is what carries the new
+  design across every screen that has not been rewritten: same fill, same
+  22px radius and same top highlight as .vsx-panel, so a Support card and a
+  dashboard panel are visibly the same object.
+*/
+[data-vs-theme='dark'] .vs-card,
+[data-vs-theme='dark'] .vs-card-filled {
+  background: var(--vsx-ink-2);
+  border: 0;
+  border-radius: var(--vsx-r);
+  box-shadow: var(--vsx-lift);
+}
+
+/* The blueprint registration crosshairs belong to the retired language. */
+[data-vs-theme='dark'] .corner,
+[data-vs-theme='dark'] .corner::before,
+[data-vs-theme='dark'] .corner::after {
+  display: none !important;
+}
+
+[data-vs-theme='dark'] .vs-btn {
+  border-radius: var(--vsx-r-pill);
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  border: 1px solid transparent;
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text);
+  padding: 10px 18px;
+}
+
+[data-vs-theme='dark'] .vs-btn:hover {
+  background: var(--vsx-ink-4);
+  color: var(--vsx-text);
+}
+
+[data-vs-theme='dark'] .vs-btn-primary,
+[data-vs-theme='dark'] .vs-btn-primary:hover {
+  background: var(--vsx-red);
+  border-color: transparent;
+  color: var(--vsx-on-fill);
+  font-weight: 600;
+}
+
+[data-vs-theme='dark'] .vs-btn-primary:hover { background: var(--vsx-red-hi); }
+
+[data-vs-theme='dark'] .vs-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--vsx-text-2);
+}
+
+[data-vs-theme='dark'] .vs-btn-ghost:hover {
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text);
+}
+
+[data-vs-theme='dark'] .vs-btn-icon {
+  border-radius: var(--vsx-r-pill);
+  border-color: transparent;
+  background: transparent;
+  color: var(--vsx-text-2);
+}
+
+[data-vs-theme='dark'] .vs-btn-icon:hover {
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text);
+}
+
+/*
+  Fields take the SMALL radius, not the panel radius. A 22px corner on a
+  36px-tall input turns it into a lozenge and makes a textarea look like a
+  speech bubble; 14px keeps them in the family without that.
+*/
+[data-vs-theme='dark'] .vs-input {
+  background: var(--vsx-ink-3);
+  border: 1px solid transparent;
+  border-radius: var(--vsx-r-sm);
+  color: var(--vsx-text);
+  font-family: var(--vsx-sans);
+}
+
+[data-vs-theme='dark'] .vs-input::placeholder { color: var(--vsx-text-3); }
+[data-vs-theme='dark'] .vs-input:focus        { border-color: var(--vsx-red); }
+
+[data-vs-theme='dark'] .vs-tag {
+  border-radius: var(--vsx-r-pill);
+  font-family: var(--vsx-sans);
+  font-weight: 600;
+  font-size: 12.5px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-vs-theme='dark'] .vs-tag-accent  { background: var(--vsx-red); color: var(--vsx-on-fill); }
+[data-vs-theme='dark'] .vs-tag-neutral { background: var(--vsx-ink-3); color: var(--vsx-text-2); }
+[data-vs-theme='dark'] .vs-tag-outline { border-color: var(--vsx-rule-2); color: var(--vsx-text-2); }
+
+[data-vs-theme='dark'] .vs-avatar {
+  border-radius: var(--vsx-r-pill);
+  border: none;
+  box-shadow: none;
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text-2);
+  font-family: var(--vsx-sans);
+  font-weight: 600;
+}
+
+/* The wizard's selectable options. Pill-rounded like everything pressable,
+   and selected state is the lime fill rather than a tinted outline. */
+[data-vs-theme='dark'] .vs-pick {
+  background: var(--vsx-ink-3);
+  border: 1px solid transparent;
+  border-radius: var(--vsx-r-sm);
+  transition: background var(--vsx-t) var(--vsx-ease),
+              border-color var(--vsx-t) var(--vsx-ease);
+}
+
+[data-vs-theme='dark'] .vs-pick:hover {
+  background: var(--vsx-ink-4);
+}
+
+[data-vs-theme='dark'] .vs-pick[data-selected='true'],
+[data-vs-theme='dark'] .vs-pick.selected {
+  background: var(--vsx-red-dim);
+  border-color: var(--vsx-red);
+}
+
+[data-vs-theme='dark'] .vs-progress-track,
+[data-vs-theme='dark'] .vs-measure {
+  background: var(--vsx-ink-3);
+  border-radius: var(--vsx-r-pill);
+  height: 8px;
+}
+
+[data-vs-theme='dark'] .vs-progress-fill,
+[data-vs-theme='dark'] .vs-measure-fill {
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-red);
+}
+
+[data-vs-theme='dark'] .vs-dialog {
+  background: var(--vsx-ink-2);
+  border: 0;
+  border-radius: var(--vsx-r);
+  box-shadow: var(--shadow-lg);
+}
+
+[data-vs-theme='dark'] .vs-dialog-backdrop {
+  background: rgba(5, 5, 5, 0.78);
+}
+
+[data-vs-theme='dark'] .vs-nav-item { border-radius: var(--vsx-r-pill); }
+
+[data-vs-theme='dark'] .vs-nav-item.active {
+  background: var(--vsx-text);
+  color: var(--vsx-on-fill);
+  border-left-color: transparent;
+}
+
+[data-vs-theme='dark'] .vs-table th          { color: var(--vsx-text-3); text-transform: none; letter-spacing: 0; font-size: 12px; }
+[data-vs-theme='dark'] .vs-table td          { color: var(--vsx-text); }
+[data-vs-theme='dark'] .vs-table tr:hover td { background: var(--vsx-ink-3); }
+
+/* A recognition story on a screen not yet rewritten. No rule down the side —
+   this design does not use them — just the story at reading size. */
+[data-vs-theme='dark'] .vs-quote,
+[data-vs-theme='dark'] .vs-quote-sm {
+  border-left: 0;
+  padding-left: 0;
+  font-family: var(--vsx-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--vsx-text);
+  max-width: 62ch;
+}
+
+/* The old system put a tracked-out capital label above everything. Here that
+   IS the house style, so kickers keep their capitals and adopt the condensed
+   face instead of being flattened into sentence case. */
+[data-vs-theme='dark'] .vs-kicker {
+  color: var(--vsx-text-2);
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+[data-vs-theme='dark'] .vs-section-header { border-bottom-color: var(--vsx-rule); }
+
+[data-vs-theme='dark'] .font-condensed {
+  font-family: var(--vsx-display);
+  letter-spacing: 0.005em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+[data-vs-theme='dark'] .vs-metric-value {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--vsx-text);
+}
+
+/* ---- Compiled Tailwind colour utilities --------------------------------- */
+[data-vs-theme='dark'] .bg-surface           { background-color: var(--vsx-ink-2) !important; }
+[data-vs-theme='dark'] .bg-surface-secondary { background-color: var(--vsx-ink-3) !important; }
+[data-vs-theme='dark'] .bg-background        { background-color: var(--vsx-ink) !important; }
+[data-vs-theme='dark'] .bg-border            { background-color: var(--vsx-rule) !important; }
+[data-vs-theme='dark'] .bg-text-disabled     { background-color: var(--vsx-text-3) !important; }
+[data-vs-theme='dark'] .border-border        { border-color: var(--vsx-rule) !important; }
+[data-vs-theme='dark'] .text-text-primary    { color: var(--vsx-text) !important; }
+[data-vs-theme='dark'] .text-text-secondary  { color: var(--vsx-text-2) !important; }
+[data-vs-theme='dark'] .text-text-muted      { color: var(--vsx-text-2) !important; }
+[data-vs-theme='dark'] .text-text-disabled   { color: var(--vsx-text-3) !important; }
+
+[data-vs-theme='dark'] [class*='bg-blue']     { background-color: var(--vsx-red-dim) !important; }
+[data-vs-theme='dark'] [class*='text-blue']   { color: var(--vsx-red) !important; }
+[data-vs-theme='dark'] [class*='border-blue'] { border-color: var(--vsx-red) !important; }
+[data-vs-theme='dark'] [class*='ring-blue']   { --tw-ring-color: var(--vsx-red) !important; }
+[data-vs-theme='dark'] .text-danger           { color: var(--vsx-danger) !important; }
+[data-vs-theme='dark'] .text-success          { color: var(--vsx-red) !important; }
+
+/* Rounded corners from the old system are pulled up to the new radius so a
+   legacy card and a panel never sit side by side with different corners. */
+[data-vs-theme='dark'] .rounded-lg,
+[data-vs-theme='dark'] .rounded-xl,
+[data-vs-theme='dark'] .rounded-2xl { border-radius: var(--vsx-r-sm) !important; }
+[data-vs-theme='dark'] .rounded-full { border-radius: var(--vsx-r-pill) !important; }

@@ -1,0 +1,731 @@
+{
+  "_note": "ValueSpot prototype — complete mock dataset. Canonical value order: adaptable, transparent, collaborative, innovative, accountable.",
+  "currentUser": "shruti",
+  "coreValues": [
+    {
+      "key": "adaptable",
+      "name": "Adaptable",
+      "tone": "var(--value-adaptable)",
+      "hex": "#2a6ea8",
+      "description": "Adjusts positively to changing requirements, priorities and technologies.",
+      "scenario": "Requirements shifted late in a sprint and this person reshaped their plan without losing momentum.",
+      "behaviours": [
+        "Adapted to changing client requirements",
+        "Learned a new tool or process",
+        "Stayed effective during uncertainty",
+        "Helped others adapt",
+        "Adjusted priorities quickly",
+        "Other"
+      ]
+    },
+    {
+      "key": "transparent",
+      "name": "Transparent",
+      "tone": "var(--value-transparent)",
+      "hex": "#5b6b78",
+      "description": "Communicates openly, honestly and responsibly.",
+      "scenario": "A risk was spotted early and raised openly, so the team could act before it reached the client.",
+      "behaviours": [
+        "Shared important information proactively",
+        "Flagged a risk early",
+        "Owned a mistake",
+        "Gave constructive feedback",
+        "Communicated clearly under pressure",
+        "Other"
+      ]
+    },
+    {
+      "key": "collaborative",
+      "name": "Collaborative",
+      "tone": "var(--value-collaborative)",
+      "hex": "#be3a66",
+      "description": "Works effectively with others and prioritizes collective success.",
+      "scenario": "A colleague was struggling with a production issue and you helped them resolve it.",
+      "behaviours": [
+        "Supported a colleague",
+        "Shared knowledge",
+        "Helped solve a difficult problem",
+        "Worked across teams",
+        "Helped resolve a conflict",
+        "Put team success first",
+        "Other"
+      ]
+    },
+    {
+      "key": "innovative",
+      "name": "Innovative",
+      "tone": "var(--value-innovative)",
+      "hex": "#a25a0b",
+      "description": "Challenges existing approaches and creates better ways of working.",
+      "scenario": "A repetitive manual task was automated, giving the team back hours every week.",
+      "behaviours": [
+        "Introduced a new solution",
+        "Automated repetitive work",
+        "Suggested a real improvement",
+        "Experimented with new technology",
+        "Found a better way to solve a problem",
+        "Other"
+      ]
+    },
+    {
+      "key": "accountable",
+      "name": "Accountable",
+      "tone": "var(--value-accountable)",
+      "hex": "#c42a20",
+      "description": "Takes ownership of commitments, responsibilities and outcomes.",
+      "scenario": "A commitment was at risk and this person owned it through to delivery.",
+      "behaviours": [
+        "Delivered on a commitment",
+        "Took responsibility for an outcome",
+        "Followed through without being chased",
+        "Escalated a risk responsibly",
+        "Kept stakeholders informed",
+        "Other"
+      ]
+    }
+  ],
+  "badges": [
+    {
+      "code": "B1",
+      "name": "Cheers",
+      "min": 1,
+      "range": "1–2 recognitions"
+    },
+    {
+      "code": "B2",
+      "name": "Applause",
+      "min": 3,
+      "range": "3–5 recognitions"
+    },
+    {
+      "code": "B3",
+      "name": "Kudos",
+      "min": 6,
+      "range": "6–10 recognitions"
+    },
+    {
+      "code": "B4",
+      "name": "Spotlight",
+      "min": 11,
+      "range": "11–15 recognitions"
+    },
+    {
+      "code": "B5",
+      "name": "Value Ambassador",
+      "min": 16,
+      "range": "16+ recognitions"
+    }
+  ],
+  "people": [
+    {
+      "id": "amit",
+      "name": "Amit Deshpande",
+      "role": "Senior QA Engineer",
+      "dept": "Quality",
+      "project": "ABC Client"
+    },
+    {
+      "id": "priya",
+      "name": "Priya Nair",
+      "role": "Product Designer",
+      "dept": "Design",
+      "project": "Helix Portal"
+    },
+    {
+      "id": "rahul",
+      "name": "Rahul Menon",
+      "role": "Backend Engineer",
+      "dept": "Platform",
+      "project": "Helix Portal"
+    },
+    {
+      "id": "shruti",
+      "name": "Shruti Kulkarni",
+      "role": "Implementation Lead",
+      "dept": "Delivery",
+      "project": "ABC Client",
+      "self": true
+    },
+    {
+      "id": "farhan",
+      "name": "Farhan Qureshi",
+      "role": "Data Analyst",
+      "dept": "Insights",
+      "project": "Nova Reporting"
+    },
+    {
+      "id": "meera",
+      "name": "Meera Iyer",
+      "role": "Engineering Manager",
+      "dept": "Platform",
+      "project": "Helix Portal"
+    },
+    {
+      "id": "vikram",
+      "name": "Vikram Rao",
+      "role": "DevOps Engineer",
+      "dept": "Platform",
+      "project": "Nova Reporting"
+    },
+    {
+      "id": "ananya",
+      "name": "Ananya Sharma",
+      "role": "Business Analyst",
+      "dept": "Delivery",
+      "project": "ABC Client"
+    },
+    {
+      "id": "kiran",
+      "name": "Kiran Joshi",
+      "role": "Support Engineer",
+      "dept": "Service Desk",
+      "project": "ABC Client"
+    }
+  ],
+  "feed": [
+    {
+      "id": "f1",
+      "from": "Priya Nair",
+      "to": "Amit Deshpande",
+      "value": "Collaborative",
+      "behaviour": "Shared knowledge",
+      "story": "Amit walked me through the new API integration and stayed back to help us finish the client requirement.",
+      "impact": "We closed the ABC Client requirement on the original date instead of slipping a week.",
+      "project": "ABC Client",
+      "date": "Today, 10:24",
+      "appreciations": 12
+    },
+    {
+      "id": "f2",
+      "from": "Rahul Menon",
+      "to": "Shruti Kulkarni",
+      "value": "Accountable",
+      "behaviour": "Delivered on a commitment",
+      "story": "Shruti owned the migration cutover end to end, including the two rollback rehearsals nobody asked for.",
+      "impact": "Zero downtime on cutover night and no escalations from the client.",
+      "project": "Nova Reporting",
+      "date": "Today, 09:05",
+      "appreciations": 9
+    },
+    {
+      "id": "f3",
+      "from": "Ananya Sharma",
+      "to": "Farhan Qureshi",
+      "value": "Innovative",
+      "behaviour": "Automated repetitive work",
+      "story": "Farhan replaced our weekly reporting spreadsheet with a scheduled pipeline in two afternoons.",
+      "impact": "Six hours a week returned to the Insights team, and the numbers stopped disagreeing.",
+      "project": "Nova Reporting",
+      "date": "Yesterday",
+      "appreciations": 15
+    },
+    {
+      "id": "f4",
+      "from": "Meera Iyer",
+      "to": "Vikram Rao",
+      "value": "Transparent",
+      "behaviour": "Flagged a risk early",
+      "story": "Vikram raised the certificate expiry three weeks before it would have hit production, with a plan attached.",
+      "impact": "A weekend outage that never happened.",
+      "project": "Helix Portal",
+      "date": "Yesterday",
+      "appreciations": 7
+    },
+    {
+      "id": "f5",
+      "from": "Kiran Joshi",
+      "to": "Priya Nair",
+      "value": "Adaptable",
+      "behaviour": "Adapted to changing client requirements",
+      "story": "The client reversed the onboarding scope mid-sprint and Priya reworked the flows without losing the release.",
+      "impact": "The release shipped on schedule with the new scope included.",
+      "project": "Helix Portal",
+      "date": "2 days ago",
+      "appreciations": 11
+    },
+    {
+      "id": "f6",
+      "from": "Amit Deshpande",
+      "to": "Ananya Sharma",
+      "value": "Collaborative",
+      "behaviour": "Worked across teams",
+      "story": "Ananya pulled QA, support and delivery into one room and untangled the defect backlog in a single session.",
+      "impact": "Backlog down from 41 to 12 open defects before the release gate.",
+      "project": "ABC Client",
+      "date": "3 days ago",
+      "appreciations": 6
+    }
+  ],
+  "journey": [
+    {
+      "key": "collaborative",
+      "count": 18,
+      "recognizers": 11,
+      "last": "2 Aug"
+    },
+    {
+      "key": "accountable",
+      "count": 8,
+      "recognizers": 6,
+      "last": "1 Aug"
+    },
+    {
+      "key": "innovative",
+      "count": 4,
+      "recognizers": 3,
+      "last": "24 Jul"
+    },
+    {
+      "key": "adaptable",
+      "count": 2,
+      "recognizers": 2,
+      "last": "18 Jul"
+    },
+    {
+      "key": "transparent",
+      "count": 0,
+      "recognizers": 0,
+      "last": "—"
+    }
+  ],
+  "received": [
+    {
+      "from": "Rahul Menon",
+      "value": "Accountable",
+      "behaviour": "Delivered on a commitment",
+      "project": "Nova Reporting",
+      "date": "Today",
+      "story": "Shruti owned the migration cutover end to end, including the two rollback rehearsals nobody asked for."
+    },
+    {
+      "from": "Meera Iyer",
+      "value": "Collaborative",
+      "behaviour": "Put team success first",
+      "project": "Helix Portal",
+      "date": "28 Jul",
+      "story": "Shruti handed the client demo to a first-time presenter and coached her through it instead of taking the stage."
+    },
+    {
+      "from": "Farhan Qureshi",
+      "value": "Collaborative",
+      "behaviour": "Shared knowledge",
+      "project": "ABC Client",
+      "date": "21 Jul",
+      "story": "Shruti wrote up the escalation playbook after the incident so the next person would not have to guess."
+    }
+  ],
+  "given": [
+    {
+      "to": "Amit Deshpande",
+      "value": "Collaborative",
+      "behaviour": "Shared knowledge",
+      "date": "Today",
+      "status": "Pending"
+    },
+    {
+      "to": "Vikram Rao",
+      "value": "Accountable",
+      "behaviour": "Escalated a risk responsibly",
+      "date": "Yesterday",
+      "status": "Clarification"
+    },
+    {
+      "to": "Priya Nair",
+      "value": "Adaptable",
+      "behaviour": "Adjusted priorities quickly",
+      "date": "2 Aug",
+      "status": "Approved"
+    },
+    {
+      "to": "Farhan Qureshi",
+      "value": "Innovative",
+      "behaviour": "Automated repetitive work",
+      "date": "29 Jul",
+      "status": "Approved"
+    },
+    {
+      "to": "Kiran Joshi",
+      "value": "Transparent",
+      "behaviour": "Owned a mistake",
+      "date": "22 Jul",
+      "status": "Not approved"
+    }
+  ],
+  "clarificationCallout": {
+    "title": "Your recognition for Vikram needs a little more context",
+    "quote": "Meera Iyer asked: \"Please provide a little more context about the impact of this behaviour.\""
+  },
+  "notifications": [
+    {
+      "title": "Priya recognized Amit for Collaborative",
+      "body": "Your team is being noticed — open the feed to appreciate it.",
+      "time": "10m",
+      "kind": "recognition"
+    },
+    {
+      "title": "Recognition published",
+      "body": "Your recognition for Priya Nair was approved by her manager.",
+      "time": "2h",
+      "kind": "approval"
+    },
+    {
+      "title": "Clarification requested",
+      "body": "Meera Iyer asked for more context on your recognition for Vikram.",
+      "time": "1d",
+      "kind": "approval"
+    },
+    {
+      "title": "New badge unlocked — Kudos",
+      "body": "Accountable · 8 recognitions. Applause → Kudos.",
+      "time": "2d",
+      "kind": "badge"
+    },
+    {
+      "title": "Badge thresholds updated",
+      "body": "HR adjusted the Spotlight threshold for the 2026 badge year.",
+      "time": "5d",
+      "kind": "system"
+    }
+  ],
+  "approvals": [
+    {
+      "id": "a1",
+      "from": "Shruti Kulkarni",
+      "to": "Vikram Rao",
+      "person": "shruti",
+      "value": "Accountable",
+      "behaviour": "Escalated a risk responsibly",
+      "story": "Vikram caught the certificate expiry three weeks out, wrote the rotation runbook and walked the on-call rota through it.",
+      "impact": "A weekend outage that never happened, and a runbook the next person can follow.",
+      "meta": "Helix Portal · submitted 2 hours ago",
+      "age": "2h"
+    },
+    {
+      "id": "a2",
+      "from": "Priya Nair",
+      "to": "Rahul Menon",
+      "person": "priya",
+      "value": "Collaborative",
+      "behaviour": "Helped solve a difficult problem",
+      "story": "Rahul sat with design for a full afternoon to rework the pagination contract instead of sending it back over the wall.",
+      "impact": "The portal list views shipped in the same sprint they were designed.",
+      "meta": "Helix Portal · submitted yesterday",
+      "age": "1d"
+    },
+    {
+      "id": "a3",
+      "from": "Kiran Joshi",
+      "to": "Meera Iyer",
+      "person": "kiran",
+      "value": "Transparent",
+      "behaviour": "Communicated clearly under pressure",
+      "story": "During the Friday incident Meera gave support an honest update every twenty minutes, including when there was nothing new.",
+      "impact": "Support could hold the client line without guessing, and no escalation was raised.",
+      "meta": "ABC Client · submitted 2 days ago",
+      "age": "2d"
+    },
+    {
+      "id": "a4",
+      "from": "Farhan Qureshi",
+      "to": "Vikram Rao",
+      "person": "farhan",
+      "value": "Innovative",
+      "behaviour": "Automated repetitive work",
+      "story": "Vikram scripted the environment refresh that three of us were doing by hand every Monday.",
+      "impact": "About four hours a week back for the Platform team.",
+      "meta": "Nova Reporting · submitted 3 days ago",
+      "age": "3d"
+    }
+  ],
+  "team": [
+    {
+      "name": "Rahul Menon",
+      "role": "Backend Engineer",
+      "counts": [
+        2,
+        1,
+        9,
+        3,
+        5
+      ]
+    },
+    {
+      "name": "Vikram Rao",
+      "role": "DevOps Engineer",
+      "counts": [
+        4,
+        6,
+        3,
+        7,
+        12
+      ]
+    },
+    {
+      "name": "Priya Nair",
+      "role": "Product Designer",
+      "counts": [
+        8,
+        2,
+        11,
+        6,
+        3
+      ]
+    },
+    {
+      "name": "Farhan Qureshi",
+      "role": "Data Analyst",
+      "counts": [
+        1,
+        0,
+        4,
+        16,
+        2
+      ]
+    },
+    {
+      "name": "Kiran Joshi",
+      "role": "Support Engineer",
+      "counts": [
+        3,
+        5,
+        6,
+        0,
+        4
+      ]
+    }
+  ],
+  "quietPeople": [
+    {
+      "name": "Ananya Sharma",
+      "role": "Business Analyst · Delivery"
+    },
+    {
+      "name": "Kiran Joshi",
+      "role": "Support Engineer · Service Desk"
+    }
+  ],
+  "managerMetrics": [
+    {
+      "label": "Pending approvals",
+      "value": "live count",
+      "note": "Oldest waiting 3 days"
+    },
+    {
+      "label": "Published this month",
+      "value": "23",
+      "note": "+6 on July"
+    },
+    {
+      "label": "Team members recognized",
+      "value": "9 / 11",
+      "note": "2 not recognized in 90 days"
+    },
+    {
+      "label": "Median review time",
+      "value": "11h",
+      "note": "Target under 48h"
+    }
+  ],
+  "employeeMetrics": [
+    {
+      "label": "Recognitions received",
+      "value": "7",
+      "note": "Across 4 core values"
+    },
+    {
+      "label": "Recognitions given",
+      "value": "12",
+      "note": "3 awaiting validation"
+    },
+    {
+      "label": "This month",
+      "value": "3",
+      "note": "August 2026"
+    },
+    {
+      "label": "Most recognized value",
+      "value": "Collaborative",
+      "note": "18 recognitions this year"
+    }
+  ],
+  "hrMetrics": [
+    {
+      "label": "Recognitions this month",
+      "value": "318",
+      "note": "+12% on July"
+    },
+    {
+      "label": "Participation",
+      "value": "74%",
+      "note": "305 of 412 employees"
+    },
+    {
+      "label": "Approval rate",
+      "value": "91%",
+      "note": "6% returned for context"
+    },
+    {
+      "label": "Badges awarded YTD",
+      "value": "708",
+      "note": "9 Value Ambassadors"
+    }
+  ],
+  "valueDistribution": [
+    {
+      "key": "collaborative",
+      "count": 1284
+    },
+    {
+      "key": "accountable",
+      "count": 1042
+    },
+    {
+      "key": "adaptable",
+      "count": 761
+    },
+    {
+      "key": "innovative",
+      "count": 548
+    },
+    {
+      "key": "transparent",
+      "count": 396
+    }
+  ],
+  "badgeDistribution": [
+    {
+      "code": "B1",
+      "count": 312
+    },
+    {
+      "code": "B2",
+      "count": 208
+    },
+    {
+      "code": "B3",
+      "count": 141
+    },
+    {
+      "code": "B4",
+      "count": 38
+    },
+    {
+      "code": "B5",
+      "count": 9
+    }
+  ],
+  "leaders": [
+    {
+      "name": "Priya Nair",
+      "dept": "Design",
+      "value": "Collaborative",
+      "count": 31
+    },
+    {
+      "name": "Vikram Rao",
+      "dept": "Platform",
+      "value": "Accountable",
+      "count": 28
+    },
+    {
+      "name": "Shruti Kulkarni",
+      "dept": "Delivery",
+      "value": "Collaborative",
+      "count": 24
+    },
+    {
+      "name": "Farhan Qureshi",
+      "dept": "Insights",
+      "value": "Innovative",
+      "count": 22
+    },
+    {
+      "name": "Amit Deshpande",
+      "dept": "Quality",
+      "value": "Transparent",
+      "count": 19
+    }
+  ],
+  "departments": [
+    {
+      "name": "Platform",
+      "pct": 88
+    },
+    {
+      "name": "Delivery",
+      "pct": 81
+    },
+    {
+      "name": "Design",
+      "pct": 76
+    },
+    {
+      "name": "Quality",
+      "pct": 69
+    },
+    {
+      "name": "Insights",
+      "pct": 54
+    },
+    {
+      "name": "Service Desk",
+      "pct": 41
+    }
+  ],
+  "employeeStats": {
+    "_format": "[received, given] — 'Highest badge' column uses badgeFor(round(received / 3))",
+    "amit": [
+      19,
+      14
+    ],
+    "priya": [
+      31,
+      22
+    ],
+    "rahul": [
+      20,
+      17
+    ],
+    "shruti": [
+      24,
+      12
+    ],
+    "farhan": [
+      22,
+      9
+    ],
+    "meera": [
+      16,
+      26
+    ],
+    "vikram": [
+      28,
+      11
+    ],
+    "ananya": [
+      13,
+      18
+    ],
+    "kiran": [
+      8,
+      21
+    ]
+  },
+  "unlockDialog": {
+    "kicker": "New Core Value badge unlocked",
+    "badge": "Kudos",
+    "value": "Accountable",
+    "level": 3,
+    "body": "You've been recognized 8 times for taking ownership of commitments. Applause → Kudos."
+  },
+  "loginDefaults": {
+    "email": "shruti.kulkarni@touchcoresystems.com",
+    "password": "••••••••••"
+  },
+  "org": {
+    "company": "Touchcore Systems",
+    "employees": 412,
+    "departments": 6,
+    "period": "August 2026"
+  }
+}

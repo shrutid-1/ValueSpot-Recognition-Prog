@@ -1,0 +1,10 @@
+<!--
+  The ValueSpot mark: the dotted O of the wordmark, on the logo's own black.
+  Same geometry as ValueSpotMark in src/components/brand/ValueSpotLogo.tsx —
+  if one moves, move the other.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="7" fill="#0B0B0B"/>
+  <circle cx="16" cy="16" r="8.5" fill="none" stroke="#FFFFFF" stroke-width="3.3"/>
+  <circle cx="16" cy="16" r="3.1" fill="#E3352B"/>
+</svg>

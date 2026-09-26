@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Product Principles Check",
+      "trigger": "PostFileSave",
+      "description": "Verify product principles are not violated when recognition or badge components are modified",
+      "matcher": "src/(components|pages)/(recognition|badges|analytics).*\\.(ts|tsx)$",
+      "action": {
+        "type": "agent",
+        "prompt": "A recognition, badge, or analytics component was just saved. Please verify against the product principles in .kiro/steering/product-principles.md:\n1. No hardcoded badge thresholds (values like 1, 2, 3, 5, 6, 10, 11, 15, 16 used as badge boundaries)\n2. No language like \"Top Performer\", \"Best Employee\", \"Performance Score\", \"Rating\", \"Winner\"\n3. Rejected nominations are not visible to employees\n4. Badge counts are not connected to performance evaluation language\n5. No hardcoded recognition counts or dashboard numbers\nReport any violations."
+      }
+    }
+  ]
+}

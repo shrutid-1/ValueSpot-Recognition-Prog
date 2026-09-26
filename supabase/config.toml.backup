@@ -1,0 +1,54 @@
+# Supabase local development configuration
+# https://supabase.com/docs/guides/cli/config
+
+[api]
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+port = 54323
+
+[inbucket]
+port = 54324
+smtp_port = 54325
+pop3_port = 54326
+
+[storage]
+file_size_limit = "50MiB"
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://localhost:5173"]
+jwt_expiry = 3600
+# MUST stay false. Account creation is gated on an eligible employee record and
+# is performed exclusively by the `signup` Edge Function using the service role
+# (admin.createUser, which is unaffected by this flag). Leaving this true would
+# let anyone call supabase.auth.signUp() from the browser with the public anon
+# key and self-register with no Company ID check at all.
+#
+# This file configures LOCAL development only — the same setting must be turned
+# off in the hosted project under Authentication > Providers > Email >
+# "Allow new users to sign up".
+enable_signup = false
+
+[auth.external.google]
+enabled = false
+
+[auth.external.azure]
+enabled = false
+
+[functions]
+verify_jwt = true
+
+# Callers of the signup function are by definition not yet authenticated, so it
+# cannot require a JWT. It performs its own eligibility verification and
+# throttling instead.
+[functions.signup]
+verify_jwt = false

@@ -1,0 +1,1807 @@
+/* ============================================================================
+   VALUESPOT — ADMINISTRATIVE PORTALS (Manager · HR Admin · Super Admin)
+   ============================================================================
+
+   A light, rounded, card-based workspace: a soft grey canvas, one white frame
+   holding the whole application, and content presented as white panels with
+   generous radii. The Touchcore signal red is the only accent, and it carries
+   emphasis — the figure that matters most on a screen is the one wearing it.
+
+   Rules of the system:
+
+   · The APPLICATION is a frame. Sidebar and content live inside one white
+     rounded container floating on the canvas; nothing touches the viewport
+     edge.
+   · Content lives in PANELS: white, 18px radius, one hairline border, no
+     heavy shadows. Depth comes from the canvas behind them.
+   · Controls are PILLS. Buttons, search, filters, chips — 999px, always.
+   · One figure per card, set large; everything else on the card explains it.
+   · Red means "this is the thing to look at". It is spent on the primary
+     action, the leading metric and the active navigation item — nowhere else.
+     It is NOT what a destructive control wears; see the status tokens.
+
+   Scoped to [data-vs-portal='admin'], which AppShell sets on the document
+   element while an administrative portal is mounted. The Employee portal
+   never sets it and is untouched by this file.
+
+   The scope re-points the Blueprint tokens (--color-*) rather than asking
+   every administrative screen to be rewritten: the twenty-odd HR screens are
+   written against those variables inline, so redefining them here restyles
+   all of them coherently. New structure uses the ad- prefix.
+   ========================================================================= */
+
+[data-vs-portal='admin'] {
+  /* ---- The accent ramp — Touchcore signal red ----------------------------
+     One hue, nine steps. 500 is the logo red exactly (#E3352B); 600 is the
+     primary action, deepened until white text on it clears AA at 5.7:1 —
+     the logo red itself manages only 4.4:1 and would fail on a 13.5px
+     button label. 700/800 are the deep fills; 50/100 are the tints under
+     chips and hovers. */
+  --ad-a-50:   #FDF1EF;
+  --ad-a-100:  #FADFDB;
+  --ad-a-200:  #F3BCB5;
+  --ad-a-300:  #E98F86;
+  --ad-a-400:  #DE584D;
+  --ad-a-500:  #E3352B;
+  --ad-a-600:  #C42A20;
+  --ad-a-700:  #A2211A;
+  --ad-a-800:  #7C1913;
+  --ad-a-900:  #55110C;
+
+  /* ---- Surfaces ----------------------------------------------------------
+     Canvas → frame → content ground → panel. Four steps, each barely apart,
+     which is what lets a white card read as an object without a shadow. */
+  --ad-canvas: #E9E7E7;
+  --ad-frame:  #FFFFFF;
+  --ad-ground: #F8F6F6;
+  --ad-panel:  #FFFFFF;
+  --ad-inset:  #F6F4F4;
+  --ad-hover:  #F3F0F0;
+
+  /* ---- Edges ------------------------------------------------------------- */
+  --ad-line:   #E9E5E5;
+  --ad-line-2: #DFDADA;
+
+  /* ---- Text ---------------------------------------------------------------
+     18.0:1, 5.3:1 and 5.2:1 on a white panel. The third was #9A9A9E (2.8:1),
+     and in practice it carried card subtitles, table headers and whole
+     sentences, not only axis ticks — so it is set at the lightest grey that
+     still clears AA (4.5:1) on every surface text sits on here, the hovered
+     row (#F3F0F0) included. That lands it beside the second step in value;
+     what separates a label from body copy is its size, weight and case. */
+  --ad-text:   #16161A;
+  --ad-text-2: #6B6B70;
+  --ad-text-3: #6D6D70;
+
+  /* ---- Status ------------------------------------------------------------
+     Only three, and all three state a FACT about a row rather than shouting.
+     Amber is "waiting on a person", not "warning".
+
+     These are deliberately NOT drawn from the accent ramp above, and green
+     stays green. The accent is now the brand red, so borrowing it for
+     "approved" would put the same colour on the thing that happened and on
+     the button that does the next thing — and a red approval pill reads as a
+     failure to everyone who has ever used a form. A status names a fact; the
+     accent points at an action. They are different jobs and they keep
+     different palettes. */
+  --ad-ok:      #1E7049;
+  --ad-ok-bg:   #E4F2EA;
+  --ad-wait:    #8A5A06;
+  --ad-wait-bg: #FBF0DC;
+  --ad-idle:    #5C6470;
+  --ad-idle-bg: #EDEFF2;
+
+  /* ---- Geometry ---------------------------------------------------------- */
+  --ad-r-frame: 26px;
+  --ad-r:       18px;
+  --ad-r-sm:    12px;
+  --ad-r-pill:  999px;
+  --ad-gap:     14px;
+
+  /* ---- Type ---------------------------------------------------------------
+     One family. The Blueprint portals ran Barlow against Barlow Condensed;
+     this system is a single grotesque at three weights, which is what makes
+     a dense administrative screen read as one surface. */
+  --ad-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Read by CoreValueBadge, which is shared with the Employee portal and
+     keeps Barlow there. */
+  --vs-badge-font: var(--ad-sans);
+
+  /* ---- Motion ------------------------------------------------------------- */
+  --ad-t:    150ms;
+  --ad-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  --ad-shadow:    0 1px 2px rgba(16, 24, 20, 0.04);
+  --ad-shadow-md: 0 8px 24px rgba(16, 24, 20, 0.08);
+  --ad-shadow-lg: 0 18px 48px rgba(16, 24, 20, 0.14);
+}
+
+/* =========================================================================
+   RE-POINTING THE BLUEPRINT TOKENS
+
+   Every administrative screen already speaks in --color-*. Redefining the
+   vocabulary here is what carries the redesign across all of them at once,
+   instead of leaving Employees, Departments or Reports on the old palette
+   beside a redesigned dashboard.
+   ========================================================================= */
+[data-vs-portal='admin'] {
+  /*
+    --color-bg is WHITE here, not the canvas.
+
+    In the Blueprint system it meant two things at once: the page behind
+    everything, and the light that sits ON an accent fill — the label on a
+    filled button, the fill behind a dialog, a select menu, a toast, and the
+    base every `color-mix(... 14%, var(--color-bg))` tint is mixed into. This
+    system has a grey canvas and white panels, so those two meanings come
+    apart: the canvas is --ad-canvas, applied to the shell and the body
+    below, and everything that asked for "the light" gets white.
+  */
+  --color-bg:          #FFFFFF;
+  --color-surface:     var(--ad-inset);
+  --color-text:        var(--ad-text);
+  --color-divider:     var(--ad-line);
+  --color-accent:      var(--ad-a-600);
+  --color-accent-2:    var(--ad-a-400);
+
+  --color-neutral-100: #F6F4F4;
+  --color-neutral-200: #EEEBEB;
+  --color-neutral-300: #E2DEDE;
+  --color-neutral-400: #C6C1C1;
+  --color-neutral-500: #9E9999;
+  --color-neutral-600: var(--ad-text-2);
+  --color-neutral-700: #52504F;
+  --color-neutral-800: #343231;
+  --color-neutral-900: #1C1B1B;
+
+  --color-accent-100:  var(--ad-a-50);
+  --color-accent-200:  var(--ad-a-100);
+  --color-accent-300:  var(--ad-a-200);
+  --color-accent-400:  var(--ad-a-300);
+  --color-accent-500:  var(--ad-a-500);
+  --color-accent-600:  var(--ad-a-600);
+  --color-accent-700:  var(--ad-a-700);
+  --color-accent-800:  var(--ad-a-800);
+  --color-accent-900:  var(--ad-a-900);
+
+  --color-accent-2-100: var(--ad-a-50);
+  --color-accent-2-300: var(--ad-a-200);
+  --color-accent-2-600: var(--ad-a-500);
+  --color-accent-2-700: var(--ad-a-600);
+  --color-accent-2-800: var(--ad-a-700);
+  --color-accent-2-900: var(--ad-a-900);
+
+  --color-text-muted:  var(--ad-text-2);
+  --color-text-subtle: #52504F;
+
+  --accent-soft:     var(--ad-a-50);
+  --accent-emphasis: var(--ad-a-100);
+
+  --shadow-sm: var(--ad-shadow);
+  --shadow-md: var(--ad-shadow-md);
+  --shadow-lg: var(--ad-shadow-lg);
+
+  /* Per-value tones, dark enough to sit on a white panel. The Employee
+     portal's five are light by design — they are used as solid fills under
+     near-black text — and would vanish here. */
+  --value-adaptable:     #2A6EA8;
+  --value-transparent:   #5B6B78;
+  --value-collaborative: #BE3A66;
+  --value-innovative:    #A25A0B;
+  --value-accountable:   #C42A20;
+
+  /* shadcn bridge, so Radix-based controls follow the same palette. */
+  --ring:    196 42 32;
+  --primary: 196 42 32;
+  --primary-foreground: 255 255 255;
+  --radius:  0.75rem;
+
+  font-family: var(--ad-sans);
+  color: var(--ad-text);
+  background: var(--ad-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* globals.css paints the body with --color-bg, which is now white — and the
+   body covers the viewport, so the canvas behind the frame would be lost. */
+[data-vs-portal='admin'] body {
+  background: var(--ad-canvas);
+  font-family: var(--ad-sans);
+}
+
+/* =========================================================================
+   TYPE INSIDE THE SCOPE
+   One family, sentence case, tight tracking. The condensed poster voice
+   belongs to the Employee portal; an administrative screen is read, not
+   declaimed.
+   ========================================================================= */
+[data-vs-portal='admin'] h1,
+[data-vs-portal='admin'] h2,
+[data-vs-portal='admin'] h3,
+[data-vs-portal='admin'] h4,
+[data-vs-portal='admin'] h5,
+[data-vs-portal='admin'] h6,
+[data-vs-portal='admin'] .font-condensed,
+[data-vs-portal='admin'] button,
+[data-vs-portal='admin'] input,
+[data-vs-portal='admin'] textarea,
+[data-vs-portal='admin'] select {
+  font-family: var(--ad-sans);
+}
+
+[data-vs-portal='admin'] h1,
+[data-vs-portal='admin'] h2,
+[data-vs-portal='admin'] h3 {
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  text-transform: none;
+}
+
+[data-vs-portal='admin'] h6 {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-vs-portal='admin'] .vs-kicker {
+  color: var(--ad-text-3);
+  font-family: var(--ad-sans);
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+[data-vs-portal='admin'] .vs-metric-value {
+  font-family: var(--ad-sans);
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+[data-vs-portal='admin'] *:focus-visible {
+  outline: 2px solid var(--ad-a-500);
+  outline-offset: 2px;
+}
+
+/*
+  A TEXT FIELD IS NEVER OUTLINED.
+
+  Focus on a field is shown by the field itself — its border deepening, with a
+  soft halo behind it — or, where the field sits inside a control such as the
+  top bar's search pill, by that CONTAINER. An accent ring drawn around an input
+  that already lives inside a bordered pill reads as two rings, and on the
+  search it would draw a second rounded rectangle inside the first.
+
+  The halo replaces the outline rather than removing the indicator, so these
+  remain visible to keyboard users.
+*/
+[data-vs-portal='admin'] input:focus-visible,
+[data-vs-portal='admin'] textarea:focus-visible,
+[data-vs-portal='admin'] select:focus-visible {
+  outline: none;
+  border-color: var(--ad-a-400);
+  box-shadow: 0 0 0 3px var(--ad-a-50);
+}
+
+[data-vs-portal='admin'] .ad-search input:focus,
+[data-vs-portal='admin'] .ad-search input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+[data-vs-portal='admin'] ::-webkit-scrollbar { width: 8px; height: 8px; }
+[data-vs-portal='admin'] ::-webkit-scrollbar-thumb {
+  background: #D8D3D3;
+  border-radius: 999px;
+}
+[data-vs-portal='admin'] ::-webkit-scrollbar-thumb:hover { background: #C4BDBD; }
+
+/* =========================================================================
+   THE BLUEPRINT PRIMITIVES, RESHAPED
+
+   Same class names, same markup, new geometry. This is what keeps the
+   screens that were not rewritten — Employees, Projects, Reports, Settings —
+   from looking like a different product beside the redesigned dashboards.
+   ========================================================================= */
+
+/* The registration crosshairs are the signature of the system this replaces.
+   They have no place on a rounded card, and every administrative screen
+   renders four of them per card. */
+[data-vs-portal='admin'] .corner,
+[data-vs-portal='admin'] .bp::before,
+[data-vs-portal='admin'] .bp::after { display: none !important; }
+
+/*
+  Not clipped. Several administrative screens open a menu from inside a card —
+  the moderation menu on a recognition, a row action in a table — and those
+  are absolutely positioned, not portalled. `overflow: hidden` would cut them
+  off at the card edge. Nothing inside a card paints to its corner, so the
+  radius holds without it.
+*/
+[data-vs-portal='admin'] .vs-card,
+[data-vs-portal='admin'] .vs-card-filled {
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r);
+  box-shadow: var(--ad-shadow);
+}
+
+[data-vs-portal='admin'] .vs-card-interactive:hover {
+  border-color: var(--ad-a-200);
+  background: var(--ad-panel);
+  box-shadow: var(--ad-shadow-md);
+}
+
+[data-vs-portal='admin'] .vs-btn {
+  border-radius: var(--ad-r-pill);
+  font-family: var(--ad-sans);
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: 0;
+  padding: 9px 16px;
+  border-color: var(--ad-line-2);
+  background: var(--ad-panel);
+  transition: background var(--ad-t) var(--ad-ease),
+              border-color var(--ad-t) var(--ad-ease),
+              color var(--ad-t) var(--ad-ease);
+}
+
+[data-vs-portal='admin'] .vs-btn:hover {
+  background: var(--ad-hover);
+  border-color: var(--ad-line-2);
+  color: var(--ad-text);
+}
+
+[data-vs-portal='admin'] .vs-btn-primary {
+  background: var(--ad-a-600);
+  border-color: var(--ad-a-600);
+  color: #FFFFFF;
+}
+
+[data-vs-portal='admin'] .vs-btn-primary:hover {
+  background: var(--ad-a-700);
+  border-color: var(--ad-a-700);
+  color: #FFFFFF;
+}
+
+/* Reports › Generate insights — its own red, by request, not the brand accent. */
+[data-vs-portal='admin'] .vs-btn.ad-btn-insights {
+  background: #DC3C22;
+  border-color: #DC3C22;
+  color: #FFFFFF;
+}
+
+[data-vs-portal='admin'] .vs-btn.ad-btn-insights:hover {
+  background: color-mix(in srgb, #DC3C22 88%, #000000);
+  border-color: color-mix(in srgb, #DC3C22 88%, #000000);
+  color: #FFFFFF;
+}
+
+[data-vs-portal='admin'] .vs-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ad-a-700);
+}
+
+[data-vs-portal='admin'] .vs-btn-ghost:hover { background: var(--ad-a-50); color: var(--ad-a-800); }
+
+[data-vs-portal='admin'] .vs-btn-icon {
+  border-radius: var(--ad-r-pill);
+  border-color: var(--ad-line);
+  background: var(--ad-panel);
+  color: var(--ad-text-2);
+}
+
+[data-vs-portal='admin'] .vs-btn-icon:hover {
+  background: var(--ad-a-50);
+  color: var(--ad-a-700);
+}
+
+[data-vs-portal='admin'] .vs-input {
+  border-radius: var(--ad-r-sm);
+  background: var(--ad-panel);
+  border-color: var(--ad-line-2);
+  font-family: var(--ad-sans);
+  font-size: 14px;
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+/*
+  The container shows focus, not the field. An outline drawn around an input
+  inside an already-outlined control reads as two rings; the border colour
+  and a soft halo carry it instead.
+*/
+[data-vs-portal='admin'] .vs-input:focus,
+[data-vs-portal='admin'] .vs-input:focus-visible {
+  outline: none;
+  border-color: var(--ad-a-400);
+  box-shadow: 0 0 0 3px var(--ad-a-50);
+}
+
+[data-vs-portal='admin'] textarea.vs-input { border-radius: var(--ad-r-sm); }
+
+[data-vs-portal='admin'] .vs-tag {
+  border-radius: var(--ad-r-pill);
+  padding: 4px 10px;
+  font-family: var(--ad-sans);
+  font-weight: 500;
+}
+
+[data-vs-portal='admin'] .vs-tag-accent  { background: var(--ad-a-50);    color: var(--ad-a-700); }
+[data-vs-portal='admin'] .vs-tag-neutral { background: var(--ad-idle-bg); color: var(--ad-idle); }
+[data-vs-portal='admin'] .vs-tag-outline { border-color: var(--ad-a-200); color: var(--ad-a-700); }
+
+[data-vs-portal='admin'] .vs-seg {
+  border-radius: var(--ad-r-pill);
+  border-color: var(--ad-line-2);
+  background: var(--ad-panel);
+  padding: 3px;
+  gap: 2px;
+}
+
+[data-vs-portal='admin'] .vs-seg label {
+  border-right: 0;
+  border-radius: var(--ad-r-pill);
+  font-family: var(--ad-sans);
+}
+
+[data-vs-portal='admin'] .vs-seg input:checked + label,
+[data-vs-portal='admin'] .vs-seg label.active {
+  background: var(--ad-a-600);
+  color: #FFFFFF;
+}
+
+[data-vs-portal='admin'] .vs-table th {
+  font-family: var(--ad-sans);
+  color: var(--ad-text-3);
+  background: var(--ad-inset);
+  letter-spacing: 0.06em;
+  border-bottom: 0;
+}
+
+[data-vs-portal='admin'] .vs-table th:first-child {
+  border-top-left-radius: var(--ad-r-sm);
+  border-bottom-left-radius: var(--ad-r-sm);
+}
+
+[data-vs-portal='admin'] .vs-table th:last-child {
+  border-top-right-radius: var(--ad-r-sm);
+  border-bottom-right-radius: var(--ad-r-sm);
+}
+
+[data-vs-portal='admin'] .vs-table td { border-bottom: 1px solid var(--ad-line); }
+[data-vs-portal='admin'] .vs-table tr:hover td { background: var(--ad-inset); }
+
+[data-vs-portal='admin'] .vs-avatar {
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-a-50);
+  color: var(--ad-a-700);
+  border-color: transparent;
+  font-family: var(--ad-sans);
+}
+
+[data-vs-portal='admin'] .vs-pick {
+  border-radius: var(--ad-r-sm);
+  border-color: var(--ad-line-2);
+  background: var(--ad-panel);
+}
+
+[data-vs-portal='admin'] .vs-pick:hover {
+  background: var(--ad-a-50);
+  border-color: var(--ad-a-300);
+}
+
+[data-vs-portal='admin'] .vs-pick[data-selected='true'],
+[data-vs-portal='admin'] .vs-pick.selected {
+  background: var(--ad-a-50);
+  border-color: var(--ad-a-600);
+  box-shadow: 0 0 0 1px var(--ad-a-600);
+}
+
+[data-vs-portal='admin'] .vs-progress-track,
+[data-vs-portal='admin'] .vs-measure {
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-line);
+}
+
+[data-vs-portal='admin'] .vs-progress-fill,
+[data-vs-portal='admin'] .vs-measure-fill {
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-a-600);
+}
+
+[data-vs-portal='admin'] .vs-quote,
+[data-vs-portal='admin'] .vs-quote-sm { border-left-color: var(--ad-a-400); }
+
+[data-vs-portal='admin'] .vs-dialog {
+  border-radius: var(--ad-r);
+  border-color: var(--ad-line);
+  background: var(--ad-panel);
+  box-shadow: var(--ad-shadow-lg);
+  /* Clipped to the radius sideways, scrollable downwards (see globals.css). */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+[data-vs-portal='admin'] .vs-dialog-backdrop {
+  background: rgba(20, 23, 26, 0.38);
+}
+
+/* The Blueprint nav item, as a rounded pill with an accent marker. */
+[data-vs-portal='admin'] .vs-nav-item {
+  border-radius: var(--ad-r-sm);
+  font-family: var(--ad-sans);
+  font-size: 13.5px;
+  padding: 9px 12px;
+  color: var(--ad-text-2);
+  position: relative;
+}
+
+[data-vs-portal='admin'] .vs-nav-item:hover {
+  background: var(--ad-hover);
+  color: var(--ad-text);
+}
+
+[data-vs-portal='admin'] .vs-nav-item.active {
+  background: var(--ad-a-50);
+  color: var(--ad-a-800);
+  border-left: 0;
+  font-weight: 600;
+}
+
+/* Tailwind radius utilities are all 0 in this project — the Blueprint system
+   had no corners. Inside the scope they take the system radii, so a screen
+   written with `rounded-lg` is not the one square thing on a rounded page. */
+[data-vs-portal='admin'] .rounded-sm  { border-radius: 6px; }
+[data-vs-portal='admin'] .rounded     { border-radius: 8px; }
+[data-vs-portal='admin'] .rounded-md  { border-radius: 10px; }
+[data-vs-portal='admin'] .rounded-lg  { border-radius: var(--ad-r-sm); }
+[data-vs-portal='admin'] .rounded-xl  { border-radius: 14px; }
+[data-vs-portal='admin'] .rounded-2xl { border-radius: var(--ad-r); }
+[data-vs-portal='admin'] .rounded-3xl { border-radius: 24px; }
+
+/* =========================================================================
+   THE FRAME
+   Canvas, then one white container holding navigation and content. The gap
+   between the frame and the viewport edge is the whole reason the interface
+   reads as an application rather than as a web page.
+   ========================================================================= */
+.ad-shell {
+  /*
+    The application does not scroll; its CONTENT does. That is what keeps the
+    frame, the sidebar and the top bar in place on a long employee table, and
+    it is why the height here is exact rather than a minimum.
+  */
+  height: 100vh;
+  height: 100dvh;
+  background: var(--ad-canvas);
+  padding: clamp(0px, 1vw, 14px);
+}
+
+.ad-frame {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  height: 100%;
+  background: var(--ad-frame);
+  border-radius: var(--ad-r-frame);
+  box-shadow: var(--ad-shadow-md);
+  /*
+    Deliberately NOT clipped. Nothing paints outside the frame — the sidebar
+    is the frame's own white and the content ground is inset by the column
+    padding — while the top bar's menus (notifications, profile, the search
+    results) hang below their triggers. `overflow: hidden` here cut the
+    bottom off every one of them on a short window.
+  */
+}
+
+/* The sidebar column. Full height inside the frame, scrolling on its own
+   when the role carries enough destinations to need it. */
+.ad-side {
+  width: 244px;
+  flex-shrink: 0;
+  /*
+    Hidden below the large breakpoint, where the same navigation is served as
+    a drawer. Done here rather than with `hidden lg:flex`: this stylesheet is
+    imported after Tailwind's utilities, so `.ad-side { display: flex }` would
+    beat `.hidden` and the rail would stay on a phone.
+  */
+  display: none;
+  flex-direction: column;
+  background: var(--ad-frame);
+  height: 100%;
+  min-height: 0;
+  /*
+    The rail carries the frame's LEFT corners.
+
+    Both are white, so the frame's own radius is invisible here: the rail is a
+    square block painted on top of it, and the two left corners came out sharp
+    while the right two curved. The frame is no longer clipped (its menus have
+    to hang outside it), so the corners have to be drawn by whatever actually
+    paints them — which on this side is the rail.
+  */
+  border-top-left-radius: var(--ad-r-frame);
+  border-bottom-left-radius: var(--ad-r-frame);
+}
+
+@media (min-width: 1024px) {
+  .ad-side { display: flex; }
+}
+
+/* The content column, and the measure its pages are laid out against. */
+.ad-main-measure {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ad-side-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 20px 18px 14px;
+  flex-shrink: 0;
+}
+
+/* The mark and the wordmark are drawn by ValueSpotLogo.tsx, which carries its
+   own geometry and its own colours — the logo black stays the logo black on a
+   white rail. Only the subtitle beneath them is styled here. */
+
+.ad-brand-sub {
+  font-size: 10.5px;
+  color: var(--ad-text-3);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.ad-side-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 12px 16px;
+}
+
+.ad-side-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ad-text-3);
+  padding: 0 12px;
+  margin: 14px 0 6px;
+}
+
+.ad-side-scroll > :first-child > .ad-side-label { margin-top: 2px; }
+
+/* A destination. The active one is marked with a bar at the left edge of the
+   sidebar — the reference design's device, and a better one than a filled
+   pill: it says WHERE YOU ARE without competing with the primary action. */
+.ad-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--ad-r-sm);
+  background: transparent;
+  color: var(--ad-text-2);
+  font-family: var(--ad-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--ad-t) var(--ad-ease), color var(--ad-t) var(--ad-ease);
+}
+
+.ad-nav:hover { background: var(--ad-hover); color: var(--ad-text); }
+
+.ad-nav.active {
+  background: var(--ad-a-50);
+  color: var(--ad-a-800);
+  font-weight: 600;
+}
+
+.ad-nav.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 22px;
+  border-radius: 0 3px 3px 0;
+  background: var(--ad-a-600);
+}
+
+.ad-nav > svg { flex-shrink: 0; }
+.ad-nav.active > svg { color: var(--ad-a-600); }
+
+.ad-nav-badge {
+  margin-left: auto;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-a-100);
+  color: var(--ad-a-800);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- The right column: top bar, then the content ground ---------------- */
+.ad-col {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 10px 10px 0;
+}
+
+@media (max-width: 1023px) {
+  .ad-col { padding: 10px; }
+}
+
+.ad-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 64px;
+  flex-shrink: 0;
+  padding: 0 14px;
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r);
+}
+
+.ad-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  width: 100%;
+  max-width: 360px;
+  padding: 0 12px;
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-inset);
+  border: 1px solid transparent;
+  transition: border-color var(--ad-t) var(--ad-ease), background var(--ad-t) var(--ad-ease);
+}
+
+/* The FIELD never draws its own ring — the pill around it shows focus. */
+.ad-search:focus-within {
+  background: var(--ad-panel);
+  border-color: var(--ad-a-300);
+  box-shadow: 0 0 0 3px var(--ad-a-50);
+}
+
+.ad-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--ad-sans);
+  font-size: 13.5px;
+  color: var(--ad-text);
+}
+
+.ad-search input::placeholder { color: var(--ad-text-3); }
+
+.ad-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  color: var(--ad-text-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ad-search:focus-within .ad-kbd { background: var(--ad-inset); }
+
+/*
+  Two visibility helpers, written here rather than with Tailwind.
+
+  This stylesheet is imported after Tailwind's utilities, so a component rule
+  such as `.ad-icon-btn { display: inline-flex }` beats `lg:hidden` and the
+  element stays on screen. Anything in this file that sets `display` needs its
+  own breakpoint rule; these are it.
+*/
+/* The class is doubled to win on specificity rather than on source order —
+   the component rules that set `display` are further down this same file. */
+.ad-only-mobile.ad-only-mobile { display: none; }
+.ad-hide-xs.ad-hide-xs         { display: none; }
+
+@media (min-width: 640px) {
+  .ad-hide-xs.ad-hide-xs { display: inline-flex; }
+}
+
+@media (max-width: 1023px) {
+  .ad-only-mobile.ad-only-mobile { display: inline-flex; }
+}
+
+/* A circular control in the top bar. */
+.ad-icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-panel);
+  color: var(--ad-text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ad-t) var(--ad-ease), color var(--ad-t) var(--ad-ease);
+}
+
+.ad-icon-btn:hover { background: var(--ad-a-50); color: var(--ad-a-700); }
+
+.ad-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ad-a-600);
+  box-shadow: 0 0 0 2px var(--ad-panel);
+}
+
+.ad-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--ad-r-pill);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--ad-t) var(--ad-ease);
+  max-width: 230px;
+}
+
+.ad-user:hover { background: var(--ad-inset); }
+
+.ad-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-a-100);
+  color: var(--ad-a-800);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+.ad-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ad-avatar-sm { width: 32px; height: 32px; font-size: 11.5px; }
+.ad-avatar-lg { width: 44px; height: 44px; font-size: 15px; }
+
+.ad-user-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ad-text);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-user-mail {
+  font-size: 11.5px;
+  color: var(--ad-text-3);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A dropdown from the top bar: the profile menu, the notification centre. */
+.ad-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 230px;
+  padding: 6px;
+  border-radius: var(--ad-r);
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  box-shadow: var(--ad-shadow-lg);
+  z-index: 60;
+}
+
+.ad-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: var(--ad-r-sm);
+  background: transparent;
+  color: var(--ad-text-2);
+  font-family: var(--ad-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--ad-t) var(--ad-ease), color var(--ad-t) var(--ad-ease);
+}
+
+.ad-menu-item:hover { background: var(--ad-hover); color: var(--ad-text); }
+.ad-menu-sep { height: 1px; background: var(--ad-line); margin: 5px 4px; }
+
+/*
+  The notification centre is a shared component that paints itself with
+  --color-bg. In this system that token is the CANVAS — the grey behind the
+  frame — which is right for a page and wrong for something floating above
+  one. It is given the panel treatment here instead.
+*/
+[data-vs-portal='admin'] .vs-popover {
+  background: var(--ad-panel) !important;
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r);
+  box-shadow: var(--ad-shadow-lg);
+  overflow: hidden;
+}
+
+/* The content ground: a slightly cooler plane than the panels on it. */
+.ad-canvas {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--ad-ground);
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r);
+  padding: clamp(16px, 2vw, 24px);
+}
+
+@media (max-width: 640px) {
+  .ad-shell  { padding: 0; }
+  .ad-frame  { border-radius: 0; box-shadow: none; }
+  .ad-col    { padding: 8px; gap: 8px; }
+  .ad-canvas { border-radius: 14px; padding: 14px; }
+  .ad-topbar { height: 58px; padding: 0 10px; gap: 8px; }
+}
+
+/* =========================================================================
+   PAGE FURNITURE
+   ========================================================================= */
+.ad-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ad-gap);
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  animation: ad-rise 280ms var(--ad-ease) both;
+}
+
+@keyframes ad-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.ad-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ad-title {
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--ad-text);
+}
+
+.ad-sub {
+  font-size: 14px;
+  color: var(--ad-text-2);
+  margin-top: 6px;
+  line-height: 1.5;
+  max-width: 62ch;
+}
+
+/* ---- Buttons ------------------------------------------------------------ */
+.ad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--ad-line-2);
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-panel);
+  color: var(--ad-text);
+  font-family: var(--ad-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--ad-t) var(--ad-ease),
+              border-color var(--ad-t) var(--ad-ease),
+              color var(--ad-t) var(--ad-ease);
+}
+
+.ad-btn:hover { background: var(--ad-hover); }
+.ad-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+.ad-btn-primary {
+  background: var(--ad-a-600);
+  border-color: var(--ad-a-600);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.ad-btn-primary:hover { background: var(--ad-a-700); border-color: var(--ad-a-700); }
+
+.ad-btn-quiet { background: transparent; border-color: transparent; color: var(--ad-text-2); }
+.ad-btn-quiet:hover { background: var(--ad-hover); color: var(--ad-text); }
+
+.ad-btn-sm { height: 34px; padding: 0 14px; font-size: 12.5px; }
+
+/* ---- Grids -------------------------------------------------------------- */
+.ad-grid { display: grid; gap: var(--ad-gap); }
+.ad-grid-4 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.ad-grid-3 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.ad-grid-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+
+@media (min-width: 640px) {
+  .ad-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1000px) {
+  .ad-grid-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .ad-grid-3 { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+@media (min-width: 1240px) {
+  .ad-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ---- The panel ---------------------------------------------------------- */
+.ad-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r);
+  padding: 18px;
+}
+
+.ad-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  min-height: 34px;
+}
+
+.ad-card-title {
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ad-text);
+  line-height: 1.2;
+}
+
+.ad-card-sub {
+  font-size: 12.5px;
+  color: var(--ad-text-3);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* ---- The metric card ----------------------------------------------------
+   Four across, one of them accented. The accented one is not decoration: it is
+   whichever figure the role opened this page to see. */
+.ad-stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 150px;
+  padding: 18px;
+  border: 1px solid var(--ad-line);
+  border-radius: var(--ad-r);
+  background: var(--ad-panel);
+  text-align: left;
+  width: 100%;
+  font-family: var(--ad-sans);
+  transition: border-color var(--ad-t) var(--ad-ease),
+              box-shadow var(--ad-t) var(--ad-ease),
+              transform var(--ad-t) var(--ad-ease);
+}
+
+button.ad-stat { cursor: pointer; }
+
+button.ad-stat:hover {
+  border-color: var(--ad-a-200);
+  box-shadow: var(--ad-shadow-md);
+  transform: translateY(-1px);
+}
+
+.ad-stat-featured {
+  border-color: transparent;
+  background: linear-gradient(145deg, var(--ad-a-600) 0%, var(--ad-a-800) 100%);
+  color: #FFFFFF;
+}
+
+button.ad-stat-featured:hover { border-color: transparent; }
+
+.ad-stat-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ad-stat-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ad-text-2);
+  line-height: 1.35;
+}
+
+.ad-stat-featured .ad-stat-label { color: rgba(255, 255, 255, 0.86); }
+
+.ad-stat-arrow {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--ad-r-pill);
+  border: 1px solid var(--ad-line-2);
+  color: var(--ad-text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ad-t) var(--ad-ease), color var(--ad-t) var(--ad-ease);
+}
+
+button.ad-stat:hover .ad-stat-arrow { background: var(--ad-a-50); color: var(--ad-a-700); border-color: var(--ad-a-200); }
+
+.ad-stat-featured .ad-stat-arrow {
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #FFFFFF;
+}
+
+button.ad-stat-featured:hover .ad-stat-arrow {
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.ad-stat-value {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ad-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-stat-featured .ad-stat-value { color: #FFFFFF; }
+
+.ad-stat-value-text {
+  font-size: 23px;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.ad-stat-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ad-text-3);
+  line-height: 1.35;
+}
+
+.ad-stat-featured .ad-stat-foot { color: rgba(255, 255, 255, 0.78); }
+
+/* The small figure chip that opens the footnote on a metric card. */
+.ad-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--ad-r-pill);
+  background: var(--ad-a-50);
+  color: var(--ad-a-700);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-stat-featured .ad-chip {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+}
+
+/* ---- Status chips ------------------------------------------------------- */
+.ad-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--ad-r-pill);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ad-status-ok   { background: var(--ad-ok-bg);   color: var(--ad-ok); }
+.ad-status-wait { background: var(--ad-wait-bg); color: var(--ad-wait); }
+.ad-status-idle { background: var(--ad-idle-bg); color: var(--ad-idle); }
+
+/* ---- List rows ---------------------------------------------------------- */
+.ad-list { display: flex; flex-direction: column; }
+
+.ad-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 10px;
+  border: 0;
+  border-radius: var(--ad-r-sm);
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  font-family: var(--ad-sans);
+  transition: background var(--ad-t) var(--ad-ease);
+  min-width: 0;
+}
+
+a.ad-row, button.ad-row { cursor: pointer; }
+a.ad-row:hover, button.ad-row:hover { background: var(--ad-inset); }
+
+.ad-row + .ad-row { box-shadow: inset 0 1px 0 var(--ad-line); }
+
+.ad-row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ad-text);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-row-sub {
+  font-size: 12px;
+  color: var(--ad-text-3);
+  line-height: 1.35;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A round mark carrying a value colour, used where a list row needs an
+   identity and there is no photograph to use. */
+.ad-mark {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--ad-r-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--tone, var(--ad-a-600)) 14%, transparent);
+  color: var(--tone, var(--ad-a-600));
+}
+
+/* ---- The value pill (a Core Value, stated) ------------------------------- */
+.ad-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: var(--ad-r-pill);
+  background: color-mix(in srgb, var(--tone, var(--ad-a-600)) 12%, transparent);
+  color: var(--tone, var(--ad-a-600));
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.ad-value::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* =========================================================================
+   THE BAR BAND
+
+   Capsules on one baseline. Three things carry the reading: the HEIGHT is the
+   count against the tallest, the FILL tells the days apart (one step of the red
+   ramp each, lightest to darkest, or a hatch for none at all), and a chip gives
+   each day its figure. The peak - every bar tied for the tallest - carries a
+   pin as well.
+
+   The hatch is not decoration. A period with no recognitions has to be drawn
+   - a missing bar reads as missing data, and "nobody was recognised on
+   Sunday" is a fact worth seeing.
+   ========================================================================= */
+.ad-band {
+  /* The shortest a capsule is drawn. The chips read it too, so a short
+     bar's figure clears the bar rather than landing inside it. */
+  --ad-band-floor: 54px;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(6px, 1.4vw, 14px);
+  width: 100%;
+}
+
+.ad-band-col {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Where a capsule stands. Bottom-aligned, so every bar shares a baseline, and
+   positioned so the chip and its pin can be placed from that baseline. */
+.ad-band-slot {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.ad-band-bar {
+  width: 100%;
+  max-width: 54px;
+  /* A capsule, always: the radius exceeds half the widest the bar can be, and
+     the floor keeps a small count from collapsing into a lozenge. */
+  border-radius: 999px;
+  min-height: var(--ad-band-floor);
+  transition: height 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* The day's shade arrives inline as --ad-band-tone. A soft top-light and
+   a deeper foot give each capsule some body without changing its hue. */
+.ad-band-bar-day {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(0, 0, 0, 0.16) 100%),
+    var(--ad-band-tone, var(--ad-a-600));
+}
+
+/* Nothing recorded. Hatched rather than filled, and outlined so the capsule
+   still has an edge where the stripes meet white. */
+.ad-band-bar-empty {
+  background: repeating-linear-gradient(
+    135deg,
+    #DED9D9 0 4px,
+    #FFFFFF 4px 9px
+  );
+  box-shadow: inset 0 0 0 1px var(--ad-line);
+}
+
+/* A bar's figure, floating clear of it. */
+.ad-band-chip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  box-shadow: 0 2px 8px rgba(16, 24, 20, 0.10);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ad-text);
+  line-height: 1.2;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  z-index: 2;
+}
+
+/* The mark on the bar the chip names - a small ring sitting on its top edge,
+   so the chip is plainly ABOUT that capsule and not floating between two. */
+.ad-band-pin {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ad-panel);
+  border: 2px solid var(--ad-a-300);
+  z-index: 2;
+}
+
+.ad-band-label {
+  font-size: 13px;
+  color: var(--ad-text-3);
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .ad-band       { --ad-band-floor: 38px; }
+  .ad-band-bar   { max-width: 40px; }
+  .ad-band-label { font-size: 11.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ad-band-bar { transition: none; }
+}
+
+/* ---- The deep card ------------------------------------------------------
+   One per screen at most. It is where a single headline reading goes — the
+   value the organisation is demonstrating most, the share of recognition
+   that crosses a team boundary. */
+.ad-deep {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ad-r);
+  padding: 20px;
+  background: linear-gradient(150deg, var(--ad-a-700) 0%, var(--ad-a-900) 100%);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+}
+
+.ad-deep::after {
+  content: '';
+  position: absolute;
+  right: -70px;
+  top: -70px;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  border: 30px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.ad-deep-label {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
+}
+
+.ad-deep-value {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-deep-foot { font-size: 12px; color: rgba(255, 255, 255, 0.72); line-height: 1.45; }
+
+/* ---- The gauge ----------------------------------------------------------
+   A single share, drawn as an arc. The number inside is the reading; the
+   legend under it names what was measured. Never more than one series. */
+.ad-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.ad-gauge-wrap { position: relative; width: 100%; max-width: 230px; }
+
+.ad-gauge-read {
+  /* Centred in the ARC, not in the box: the sweep opens at the foot, so the
+     reading sits slightly above centre to stay inside the ring. */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 6%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.ad-gauge-value {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--ad-text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-gauge-label { font-size: 12px; color: var(--ad-text-3); margin-top: 4px; }
+
+.ad-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.ad-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--ad-text-2);
+}
+
+.ad-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ---- Empty and loading -------------------------------------------------- */
+.ad-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 26px 14px;
+  color: var(--ad-text-3);
+  flex: 1;
+}
+
+.ad-empty-title { font-size: 13.5px; font-weight: 600; color: var(--ad-text-2); }
+.ad-empty-text  { font-size: 12.5px; line-height: 1.5; max-width: 34ch; }
+
+.ad-skeleton {
+  background: var(--ad-inset);
+  border-radius: var(--ad-r-sm);
+  animation: ad-breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes ad-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+/* ---- Recharts, inside the scope ----------------------------------------
+   The library draws its own surfaces; these are the two that would otherwise
+   arrive with the default web-grey. */
+[data-vs-portal='admin'] .recharts-cartesian-axis-tick text { fill: var(--ad-text-3); }
+[data-vs-portal='admin'] .recharts-default-tooltip {
+  border-radius: var(--ad-r-sm) !important;
+  border: 1px solid var(--ad-line) !important;
+  box-shadow: var(--ad-shadow-md) !important;
+  font-family: var(--ad-sans);
+}
+
+/* =========================================================================
+   THE FEED, INSIDE AN ADMINISTRATIVE PORTAL
+
+   The recognition feed is ONE set of components with one set of behaviours —
+   appreciate, comment, send coins, moderate, filter, page. The Employee
+   portal wears them dark and condensed; here they wear this system.
+
+   Nothing below changes what any control does. The --vsx-* tokens those
+   components are written against are re-pointed at this palette, and only
+   the handful of rules that carry the dark portal's geometry are restated.
+   ========================================================================= */
+[data-vs-portal='admin'] {
+  --vsx-ink:   var(--ad-ground);
+  --vsx-ink-2: var(--ad-panel);
+  --vsx-ink-3: var(--ad-inset);
+  --vsx-ink-4: var(--ad-hover);
+
+  --vsx-rule:   var(--ad-line);
+  --vsx-rule-2: var(--ad-line-2);
+  --vsx-rule-3: #CFC9C9;
+
+  --vsx-text:   var(--ad-text);
+  --vsx-text-2: var(--ad-text-2);
+  --vsx-text-3: var(--ad-text-3);
+
+  --vsx-red:      var(--ad-a-600);
+  --vsx-red-hi:   var(--ad-a-500);
+  --vsx-red-dim:  var(--ad-a-50);
+  /* What sits ON the primary fill. The Employee portal's bright scarlet
+     takes near-black; this deepened one takes white, and AppreciateButton
+     reads it from here. */
+  --vsx-on-red:   #FFFFFF;
+  /* The same for every other fill (value pills, the active tab, chips):
+     here they are all deep tones, so the label on them is white. */
+  --vsx-on-fill:  #FFFFFF;
+  /* A zero shadow rather than `none`, which is invalid inside a shadow list
+     and would void any rule that composes this token with another. */
+  --vsx-lift:     0 0 #0000;
+  --vsx-v-fallback: var(--ad-text-2);
+
+  /* "Given" is chrome in the Employee portal; on a white panel that would
+     vanish, so it lands on the same graphite the value tones use. */
+  --vsx-silver:     #5B6B78;
+  --vsx-silver-hi:  #46545F;
+  --vsx-silver-dim: #EDEFF2;
+
+  /* Rose, for the same reason as in the dark portal: the accent is red. */
+  --vsx-danger:     #B3123C;
+  --vsx-wait:       #8A5A06;
+
+  --vsx-verd:      var(--vsx-red);
+  --vsx-verd-hi:   var(--vsx-red-hi);
+  --vsx-verd-dim:  var(--vsx-red-dim);
+  --vsx-brass:     var(--vsx-silver);
+  --vsx-brass-hi:  var(--vsx-silver-hi);
+  --vsx-brass-dim: var(--vsx-silver-dim);
+
+  --vsx-v-adaptable:     var(--value-adaptable);
+  --vsx-v-transparent:   var(--value-transparent);
+  --vsx-v-collaborative: var(--value-collaborative);
+  --vsx-v-innovative:    var(--value-innovative);
+  --vsx-v-accountable:   var(--value-accountable);
+
+  --vsx-display: var(--ad-sans);
+  --vsx-sans:    var(--ad-sans);
+  --vsx-serif:   var(--ad-sans);
+
+  --vsx-t:      var(--ad-t);
+  --vsx-t-slow: 380ms;
+  --vsx-ease:   var(--ad-ease);
+
+  --vsx-r:      var(--ad-r);
+  --vsx-r-sm:   var(--ad-r-sm);
+  --vsx-r-pill: var(--ad-r-pill);
+}
+
+/* A panel here is a card: bordered, flat, no inset highlight (which only
+   reads on a dark fill). */
+[data-vs-portal='admin'] .vsx-panel {
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  box-shadow: none;
+  padding: 18px;
+}
+
+[data-vs-portal='admin'] .vsx-post { padding: 20px 20px; }
+
+/* The value badge speaks this system: sentence case, the one sans. */
+[data-vs-portal='admin'] .vsx-post-value-name {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Titles are sentence case in this system, and the uppercase tracking of the
+   Employee portal is what would give it away first. */
+[data-vs-portal='admin'] .vsx-panel-title,
+[data-vs-portal='admin'] .vsx-heading {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--ad-text);
+}
+
+[data-vs-portal='admin'] .vsx-heading { font-size: 12px; color: var(--ad-text-3); font-weight: 600; }
+[data-vs-portal='admin'] .vsx-title { text-transform: none; letter-spacing: -0.035em; line-height: 1.1; }
+[data-vs-portal='admin'] .vsx-fig { letter-spacing: -0.03em; }
+
+[data-vs-portal='admin'] .vsx-btn {
+  border: 1px solid var(--ad-line-2);
+  background: var(--ad-panel);
+  color: var(--ad-text-2);
+  font-weight: 500;
+}
+
+[data-vs-portal='admin'] .vsx-btn:hover { background: var(--ad-hover); color: var(--ad-text); }
+
+[data-vs-portal='admin'] .vsx-btn-primary,
+[data-vs-portal='admin'] .vsx-btn-primary:hover {
+  background: var(--ad-a-600);
+  border-color: var(--ad-a-600);
+  color: #FFFFFF;
+}
+
+[data-vs-portal='admin'] .vsx-btn-primary:hover { background: var(--ad-a-700); border-color: var(--ad-a-700); }
+
+[data-vs-portal='admin'] .vsx-select,
+[data-vs-portal='admin'] .vsx-composer-field {
+  border: 1px solid var(--ad-line-2);
+  background: var(--ad-panel);
+  color: var(--ad-text);
+}
+
+[data-vs-portal='admin'] .vsx-select { height: 42px; }
+[data-vs-portal='admin'] .vsx-select:hover { background: var(--ad-hover); }
+[data-vs-portal='admin'] .vsx-composer-field { background: var(--ad-inset); border-color: transparent; color: var(--ad-text-3); }
+[data-vs-portal='admin'] .vsx-composer-field:hover { background: var(--ad-hover); }
+
+[data-vs-portal='admin'] .vsx-select-menu {
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  box-shadow: var(--ad-shadow-lg);
+}
+
+[data-vs-portal='admin'] .vsx-select-option[aria-selected='true'] {
+  background: var(--ad-a-50);
+  color: var(--ad-a-800);
+}
+
+[data-vs-portal='admin'] .vsx-avatar { background: var(--ad-a-100); color: var(--ad-a-800); }
+[data-vs-portal='admin'] .vsx-pair > :last-child { box-shadow: 0 0 0 2.5px var(--ad-panel); }
+
+[data-vs-portal='admin'] .vsx-post-story {
+  font-size: clamp(15.5px, 1.3vw, 17px);
+  color: var(--ad-text);
+  line-height: 1.6;
+}
+
+[data-vs-portal='admin'] .vsx-skeleton { background: var(--ad-inset); }
+
+[data-vs-portal='admin'] .vsx-round {
+  background: var(--ad-panel);
+  border: 1px solid var(--ad-line);
+  color: var(--ad-text-2);
+}
+
+/* `.vsx-wide` and `.vsx-narrow` are switched by the Employee theme inside its
+   own scope only, so without these the composer would show both labels. */
+[data-vs-portal='admin'] .vsx-wide   { display: none; }
+[data-vs-portal='admin'] .vsx-narrow { display: inline-flex; }
+
+@media (min-width: 1180px) {
+  [data-vs-portal='admin'] .vsx-wide   { display: inline-flex; }
+  [data-vs-portal='admin'] .vsx-narrow { display: none; }
+}
+
+/* The rail is an Employee-portal fixture; the feed here carries its filters
+   in the page head. */
+[data-vs-portal='admin'] .vsx-rail { display: none; }
+
+/* =========================================================================
+   REDUCED MOTION
+   Duration collapses; nothing is cancelled outright, because several of these
+   animations begin at opacity 0 and would leave content invisible.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .ad-page { animation-duration: 0.01ms; }
+  .ad-skeleton { animation: none; }
+  button.ad-stat:hover { transform: none; }
+}

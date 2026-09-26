@@ -1,0 +1,785 @@
+/* ============================================================================
+   PROFILE — the header card under the badge, and its two dialogs
+   ============================================================================
+
+   Profile is one route rendered inside BOTH shells: the Employee portal's dark
+   canvas and the administrative light one. So nothing below names a colour
+   directly. `.vp-scope` sets a handful of local tokens from whichever system
+   is in force, and every rule reads those — the same card lands correctly on
+   either canvas without a component knowing which one it is on.
+
+   The dialogs are portalled to <body> and carry the scope themselves (see
+   ProfileDialog), because the tokens they need would not otherwise reach them.
+   ========================================================================= */
+
+.vp-scope {
+  --vp-panel:     #ffffff;
+  --vp-soft:      var(--color-neutral-100);
+  --vp-soft-hi:   var(--color-neutral-200);
+  --vp-ink:       var(--color-text);
+  --vp-muted:     var(--color-neutral-600);
+  --vp-rule:      var(--color-divider);
+  --vp-accent:    var(--color-accent);
+  --vp-chip-bg:   var(--color-accent-100);
+  --vp-chip-fg:   var(--color-accent-800);
+  --vp-radius:    20px;
+  --vp-radius-sm: 14px;
+  --vp-shadow:    0 1px 2px rgba(16, 16, 20, 0.05), 0 14px 36px rgba(16, 16, 20, 0.07);
+  --vp-sans:      inherit;
+}
+
+[data-vs-portal='admin'] .vp-scope,
+.vp-scope[data-vs-portal='admin'] {
+  --vp-panel:     var(--ad-panel);
+  --vp-soft:      var(--ad-inset);
+  --vp-soft-hi:   var(--ad-hover);
+  --vp-rule:      var(--ad-line);
+  --vp-chip-bg:   var(--ad-a-50);
+  --vp-chip-fg:   var(--ad-a-700);
+  --vp-radius:    var(--ad-r);
+  --vp-radius-sm: var(--ad-r-sm);
+  --vp-shadow:    var(--ad-shadow-md);
+  --vp-sans:      var(--ad-sans);
+}
+
+[data-vs-theme='dark'] .vp-scope {
+  --vp-panel:     var(--vsx-ink-2);
+  --vp-soft:      var(--vsx-ink-3);
+  --vp-soft-hi:   var(--vsx-ink-4);
+  --vp-ink:       var(--vsx-text);
+  --vp-muted:     var(--vsx-text-2);
+  --vp-rule:      var(--vsx-rule);
+  --vp-accent:    var(--vsx-red);
+  --vp-chip-bg:   var(--vsx-red-dim);
+  --vp-chip-fg:   var(--vsx-red-hi);
+  --vp-radius:    var(--vsx-r);
+  --vp-radius-sm: var(--vsx-r-sm);
+  --vp-shadow:    var(--vsx-lift);
+  --vp-sans:      var(--vsx-sans);
+}
+
+/* ---- The card ------------------------------------------------------------ */
+
+.vp-card {
+  --vp-avatar: 120px;
+  --vp-gutter: 28px;
+
+  max-width: 920px;
+  margin: 0 auto;
+  background: var(--vp-panel);
+  border-radius: var(--vp-radius);
+  box-shadow: var(--vp-shadow);
+  overflow: hidden;
+  color: var(--vp-ink);
+  font-family: var(--vp-sans);
+}
+
+/* ---- Cover --------------------------------------------------------------- */
+
+.vp-cover {
+  position: relative;
+  height: clamp(132px, 22vw, 208px);
+  /* The default banner: a warm wash in the brand's reds with a little sky at
+     the edge, so an unset cover still reads as deliberate rather than empty. */
+  background:
+    radial-gradient(55% 140% at 8% 18%,  rgba(140, 186, 255, 0.95) 0%, transparent 62%),
+    radial-gradient(45% 120% at 38% 0%,  rgba(255, 214, 110, 0.95) 0%, transparent 60%),
+    radial-gradient(50% 150% at 66% 42%, rgba(255, 92, 72, 0.95)   0%, transparent 62%),
+    radial-gradient(40% 130% at 92% 8%,  rgba(196, 150, 255, 0.90) 0%, transparent 60%),
+    linear-gradient(115deg, #ffc2a8 0%, #ff6a55 46%, #ffd07a 100%);
+}
+
+.vp-cover > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The round white button on the banner, as in any profile editor. White in
+   both themes: it sits on a photograph, not on the page. */
+.vp-cover-edit {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.94);
+  color: #16161a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.vp-cover-edit:hover   { background: #ffffff; transform: scale(1.05); }
+.vp-cover-edit:disabled { cursor: progress; opacity: 0.8; transform: none; }
+
+/* ---- Body ---------------------------------------------------------------- */
+
+.vp-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  column-gap: 32px;
+  row-gap: 22px;
+  padding: 0 var(--vp-gutter) var(--vp-gutter);
+}
+
+.vp-identity { min-width: 0; }
+
+.vp-avatar {
+  position: relative;
+  width: var(--vp-avatar);
+  height: var(--vp-avatar);
+  /* Pulled up over the banner by just over half its height. */
+  margin-top: calc(var(--vp-avatar) * -0.56);
+  margin-bottom: 14px;
+  border-radius: 999px;
+  /* The ring is the panel colour, so the photo looks cut out of the card. */
+  box-shadow: 0 0 0 5px var(--vp-panel), 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(135deg, var(--vp-accent) 0%, #2a100d 100%);
+  z-index: 1;
+}
+
+.vp-avatar-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: calc(var(--vp-avatar) * 0.32);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.vp-avatar-face > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vp-avatar-edit {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 3px solid var(--vp-panel);
+  display: grid;
+  place-items: center;
+  background: var(--vp-ink);
+  color: var(--vp-panel);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+.vp-avatar-edit:hover    { transform: scale(1.07); }
+.vp-avatar-edit:disabled { cursor: progress; transform: none; }
+
+/* Covers an image while its replacement uploads. */
+.vp-busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.42);
+  color: #ffffff;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.vp-name {
+  margin: 0;
+  font-size: clamp(22px, 3.2vw, 28px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--vp-ink);
+  overflow-wrap: anywhere;
+}
+
+.vp-title {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--vp-muted);
+  overflow-wrap: anywhere;
+}
+
+.vp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--vp-muted);
+}
+
+.vp-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.vp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.vp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+
+.vp-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.vp-btn-solid {
+  border: 1.5px solid var(--vp-ink);
+  background: var(--vp-ink);
+  color: var(--vp-panel);
+}
+
+.vp-btn-solid:hover:not(:disabled) { opacity: 0.88; }
+
+.vp-btn-outline {
+  border: 1.5px solid var(--vp-ink);
+  background: transparent;
+  color: var(--vp-ink);
+}
+
+.vp-btn-outline:hover:not(:disabled) { background: var(--vp-soft); }
+
+/* ---- Right column: role and skills ---------------------------------------- */
+
+.vp-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 22px;
+  padding-top: 20px;
+  max-width: 380px;
+  min-width: 0;
+}
+
+.vp-aside-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vp-aside-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vp-muted);
+}
+
+.vp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.vp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--vp-chip-bg);
+  color: var(--vp-chip-fg);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.vp-chip-muted {
+  background: var(--vp-soft);
+  color: var(--vp-muted);
+  font-weight: 500;
+}
+
+/* "Add skills" and friends: a chip-shaped link into the editor. */
+.vp-chip-add {
+  border: 1.5px dashed var(--vp-rule);
+  background: transparent;
+  color: var(--vp-muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.vp-chip-add:hover { color: var(--vp-ink); border-color: var(--vp-muted); }
+
+/* ---- Highlights: three tiles along the foot ------------------------------ */
+
+.vp-highlights {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.vp-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: var(--vp-radius-sm);
+  background: var(--vp-soft);
+  color: inherit;
+  text-decoration: none;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.vp-tile:hover { background: var(--vp-soft-hi); }
+.vp-tile:hover .vp-tile-go { transform: translateX(2px); }
+
+.vp-tile-text { flex: 1; min-width: 0; }
+
+.vp-tile-kicker {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-accent);
+  margin-bottom: 4px;
+}
+
+.vp-tile-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vp-ink);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.vp-tile-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--vp-muted);
+  overflow-wrap: anywhere;
+}
+
+.vp-tile-go {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--vp-accent);
+  color: var(--vp-accent);
+  transition: transform 150ms ease;
+}
+
+/* ---- Narrow screens ------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .vp-card { --vp-avatar: 96px; --vp-gutter: 18px; }
+
+  .vp-body { grid-template-columns: minmax(0, 1fr); }
+
+  /* Role and skills drop under the name and align with it. */
+  .vp-aside,
+  .vp-aside-block { align-items: flex-start; }
+  .vp-aside       { padding-top: 0; max-width: none; }
+  .vp-chips       { justify-content: flex-start; }
+
+  .vp-highlights { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 420px) {
+  .vp-actions .vp-btn { flex: 1; }
+}
+
+/* ---- Dialogs ------------------------------------------------------------- */
+
+.vp-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+}
+
+.vp-dialog-body {
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overscroll-behavior: contain;
+}
+
+.vp-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.vp-field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-ink);
+}
+
+.vp-field-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--vp-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.vp-field-hint  { font-size: 12px; color: var(--vp-muted); line-height: 1.45; }
+.vp-field-error { font-size: 12px; color: var(--color-accent-800); line-height: 1.45; }
+[data-vs-theme='dark'] .vp-field-error { color: var(--vsx-danger); }
+
+.vp-form-error {
+  padding: 10px 12px;
+  border-radius: var(--vp-radius-sm);
+  background: var(--vp-chip-bg);
+  color: var(--vp-chip-fg);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.vp-form-notice {
+  padding: 10px 12px;
+  border-radius: var(--vp-radius-sm);
+  background: var(--vp-soft);
+  color: var(--vp-ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.vp-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-muted);
+}
+
+/* The photo editor: a miniature of the card's own header. */
+.vp-media {
+  position: relative;
+  border-radius: var(--vp-radius-sm);
+  overflow: hidden;
+  background: var(--vp-soft);
+}
+
+.vp-media .vp-cover { height: auto; aspect-ratio: 15 / 4; }
+
+.vp-media-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 0 14px 14px;
+}
+
+.vp-media .vp-avatar {
+  --vp-avatar: 76px;
+  margin-top: -38px;
+  margin-bottom: 0;
+  box-shadow: 0 0 0 4px var(--vp-soft), 0 4px 12px rgba(0, 0, 0, 0.16);
+}
+
+.vp-media-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.vp-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--vp-rule);
+  background: var(--vp-panel);
+  color: var(--vp-ink);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.vp-mini-btn:hover:not(:disabled) { background: var(--vp-soft-hi); }
+.vp-mini-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Skills field: chips and a borderless input inside one container. The
+   container shows focus; the input never wears an outline of its own. */
+.vp-skill-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 6px 8px;
+  border-radius: var(--vp-radius-sm);
+  border: 1px solid var(--vp-rule);
+  background: var(--color-surface);
+  cursor: text;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+[data-vs-portal='admin'] .vp-skill-field { background: var(--ad-panel); border-color: var(--ad-line-2); }
+[data-vs-theme='dark'] .vp-skill-field    { background: var(--vsx-ink-3); border-color: transparent; }
+
+.vp-skill-field:focus-within {
+  border-color: var(--vp-muted);
+  box-shadow: inset 0 0 0 1px var(--vp-muted);
+}
+
+[data-vs-theme='dark'] .vp-skill-field:focus-within {
+  background: var(--vsx-ink-4);
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--vsx-rule-2);
+}
+
+.vp-skill-field .vp-chip { padding: 5px 6px 5px 12px; }
+
+.vp-chip-x {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.vp-chip-x:hover { background: rgba(0, 0, 0, 0.1); }
+[data-vs-theme='dark'] .vp-chip-x:hover { background: rgba(255, 255, 255, 0.12); }
+
+.vp-skill-input {
+  flex: 1;
+  min-width: 120px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--vp-ink);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 5px 4px;
+}
+
+.vp-skill-input:focus,
+.vp-skill-input:focus-visible { outline: none; }
+
+.vp-skill-input::placeholder { color: var(--vp-muted); }
+
+.vp-detail-list { display: grid; gap: 0; margin: 0; }
+
+.vp-detail-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--vp-rule);
+  font-size: 13px;
+}
+
+.vp-detail-list > div:last-child { border-bottom: 0; }
+.vp-detail-list dt { color: var(--vp-muted); }
+.vp-detail-list dd { margin: 0; font-weight: 600; color: var(--vp-ink); text-align: right; overflow-wrap: anywhere; min-width: 0; }
+
+.vp-password-row { position: relative; }
+.vp-password-row .vs-input { padding-right: 42px; }
+
+.vp-password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--vp-muted);
+  cursor: pointer;
+}
+
+.vp-password-toggle:hover { color: var(--vp-ink); }
+
+/* ---- Crop dialog ---------------------------------------------------------- */
+
+/* Dark in both themes: a photo is judged against neutral dark, and the
+   dimmed surround reads the same way on either portal. */
+.vp-crop-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--vp-radius-sm);
+  background: #0e0e10;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.vp-crop-stage[data-active] { cursor: grabbing; }
+
+.vp-crop-stage:focus-visible,
+[data-vs-theme='dark'] .vp-crop-stage:focus-visible {
+  outline: 2px solid var(--vp-accent);
+  outline-offset: 2px;
+  border-radius: var(--vp-radius-sm);
+}
+
+/* max-width: none undoes Tailwind's preflight, which caps a canvas at 100%
+   and would squash a zoomed-in image back into the stage. */
+.vp-crop-image {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.vp-crop-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  pointer-events: none;
+  /* A crisp edge, and everything outside it dimmed. */
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92), 0 0 0 9999px rgba(8, 8, 10, 0.62);
+}
+
+.vp-crop-frame[data-round] { border-radius: 50%; }
+
+/* Rule of thirds. Brighter while the image is being moved. */
+.vp-crop-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  transition: opacity 150ms ease;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)) 33.333% 0 / 1px 100% no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)) 66.667% 0 / 1px 100% no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)) 0 33.333% / 100% 1px no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)) 0 66.667% / 100% 1px no-repeat;
+}
+
+.vp-crop-stage[data-active] .vp-crop-grid { opacity: 0.95; }
+
+.vp-crop-status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  color: #ffffff;
+  font-size: 13px;
+  text-align: center;
+}
+
+.vp-crop-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.vp-crop-zoom {
+  flex: 1 1 160px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  transition: background 150ms ease;
+}
+
+/* The slider's focus shows on its container, as for every field. */
+.vp-crop-zoom:focus-within { background: var(--vp-soft); }
+
+.vp-crop-zoom input {
+  width: 100%;
+  accent-color: var(--vp-accent);
+  cursor: pointer;
+}
+
+.vp-crop-zoom input:disabled { cursor: not-allowed; }
+
+.vp-crop-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--vp-rule);
+  background: var(--vp-panel);
+  color: var(--vp-ink);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.vp-crop-btn:hover:not(:disabled) { background: var(--vp-soft-hi); }
+.vp-crop-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.vp-crop-pct {
+  min-width: 44px;
+  text-align: right;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--vp-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-crop-grid, .vp-crop-zoom { transition: none; }
+  .vp-tile, .vp-tile-go, .vp-cover-edit, .vp-avatar-edit, .vp-btn { transition: none; }
+  .vp-tile:hover .vp-tile-go,
+  .vp-cover-edit:hover,
+  .vp-avatar-edit:hover { transform: none; }
+}

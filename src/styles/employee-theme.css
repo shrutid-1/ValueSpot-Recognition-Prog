@@ -1,0 +1,3065 @@
+/* ============================================================================
+   VALUESPOT — EMPLOYEE PORTAL
+   ============================================================================
+
+   A dark, high-contrast panel system: near-black page, soft-black panels with
+   generous radii, and the Touchcore two-accent palette (signal red for
+   recognition received, chrome for recognition given) with white as the
+   third emphasis.
+
+   Rules of the system:
+
+   · Content lives in PANELS. Rounded, unbordered, floated on the page.
+     Nothing is separated by hairline rules any more.
+   · Controls are PILLS. Radius 999px, everywhere, without exception.
+   · Titles are condensed uppercase. Body and data are Archivo.
+   · Colour carries meaning, never decoration: red = received, chrome =
+     given, and the five Core Value hues identify values on marks and pills.
+
+   Scoped to [data-vs-theme='dark']; HR and Manager portals never set it.
+   Prefix: vsx-
+   ========================================================================= */
+
+[data-vs-theme='dark'] {
+  /* ---- Surfaces ----------------------------------------------------------
+     Three steps. The page is nearly black so the panels read as objects
+     sitting on it rather than as regions cut out of it. */
+  --vsx-ink:        #0B0B0B;  /* the page */
+  --vsx-ink-2:      #171717;  /* a panel */
+  --vsx-ink-3:      #212121;  /* inset inside a panel, and control hover */
+  --vsx-ink-4:      #2C2C2C;  /* pressed */
+
+  /* ---- Edges -------------------------------------------------------------- */
+  --vsx-rule:       rgba(255, 255, 255, 0.07);
+  --vsx-rule-2:     rgba(255, 255, 255, 0.13);
+  --vsx-rule-3:     rgba(255, 255, 255, 0.24);
+
+  /* ---- Text ---------------------------------------------------------------
+     17.9:1, 6.4:1 and 5.1:1 measured on a panel. The lowest of the three is
+     the darkest grey that still clears AA for body text (4.5:1) on the inset
+     surface too (#212121, 4.6:1), where filter labels and the recognition
+     detail headings sit; #7E7E7E, the value before, managed only 4.0:1 there. */
+  --vsx-text:       #FFFFFF;
+  --vsx-text-2:     #9A9A9A;
+  --vsx-text-3:     #898989;
+
+  /* ---- Signal red — recognition received, progress, the primary action.
+     The logo red is #E3352B. Lifted to #FF4A3D here: the same hue, carried
+     up the value scale until it clears AA both ways round — 5.5:1 as text
+     on a panel and 5.9:1 as a solid fill under near-black text, which is
+     how this accent is most often used. #E3352B itself reaches only 4.2:1
+     on a panel, so it is kept for the wordmark and for deep fills that
+     carry white text. ------------------------------------------------- */
+  --vsx-red:       #FF4A3D;
+  --vsx-red-hi:    #FF7E74;
+  --vsx-red-dim:   rgba(255, 74, 61, 0.14);
+  --vsx-red-deep:  #E3352B;   /* the logo red, exactly */
+
+  /* ---- Chrome — recognition given. 9.9:1 ----------------------------------
+     The other half of the logo: the cool metal the red is set against. It
+     has to stay clearly apart from --vsx-text (pure white), which is why it
+     is pitched cool and a step down in value rather than being a plain
+     grey. ------------------------------------------------------------- */
+  --vsx-silver:     #B3C0CC;
+  --vsx-silver-hi:  #D4DDE5;
+  --vsx-silver-dim: rgba(179, 192, 204, 0.14);
+
+  /* ---- Rose — the press that destroys something. 6.8:1 ---------------------
+     Rose, not red, and that is the whole point now. The brand accent above
+     IS red, so a scarlet delete would be indistinguishable from the primary
+     action sitting beside it. Pulling destruction round to 353° keeps the
+     two apart at a glance while it still reads as a warning. Spent only on
+     a confirmed delete, never on the control that merely offers one.
+     ---------------------------------------------------------------------- */
+  --vsx-danger:     #FF7C93;
+
+  /* ---- Amber — waiting on somebody else. A STATUS, not an accent: it names
+     a fact about a row (a redemption pending approval) and is never spent on
+     chrome. 10.5:1 ------------------------------------------------------- */
+  --vsx-wait:       #F2B23C;
+
+  /* ---- What sits ON a solid fill ----------------------------------------
+     Every fill in this dark system is light (red, chrome, white, the value
+     tones), so the label on it is near-black. Light mode (theme-modes.css)
+     deepens every fill and flips this to white — one token instead of a
+     literal repeated in every pill, chip and button. */
+  --vsx-on-fill:    #0B0B0B;
+  --vsx-on-red:     var(--vsx-on-fill);
+
+  /* The faint top edge that lifts a panel off the near-black page. Light
+     mode swaps it for a soft drop shadow, which is what lifts white off
+     off-white. */
+  --vsx-lift:       inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  /*
+    Legacy aliases. The bridge stylesheet and a few un-rewritten screens still
+    speak in verdigris and brass — and anything still written against the
+    lime/orange names from the palette this one replaces lands here too. All
+    of them are re-pointed rather than chased through every file.
+  */
+  --vsx-verd:       var(--vsx-red);
+  --vsx-verd-hi:    var(--vsx-red-hi);
+  --vsx-verd-dim:   var(--vsx-red-dim);
+  --vsx-brass:      var(--vsx-silver);
+  --vsx-brass-hi:   var(--vsx-silver-hi);
+  --vsx-brass-dim:  var(--vsx-silver-dim);
+  --vsx-lime:       var(--vsx-red);
+  --vsx-lime-hi:    var(--vsx-red-hi);
+  --vsx-lime-dim:   var(--vsx-red-dim);
+  --vsx-orange:     var(--vsx-silver);
+  --vsx-orange-hi:  var(--vsx-silver-hi);
+  --vsx-orange-dim: var(--vsx-silver-dim);
+
+  /* ---- Core Values --------------------------------------------------------
+     Five marks, re-pitched onto the red/chrome axis: the two ends of the
+     brand (scarlet and platinum) plus three supporting hues warm enough to
+     sit beside them. These are CATEGORICAL, not brand chrome — five values
+     have to be told apart on a chart and in a legend, which one hue cannot
+     do, so the family is harmonised rather than collapsed.
+     All clear 7.7:1 on a panel, and all are light enough to take near-black
+     text when used as a fill — which matters, because in this system a value
+     most often appears AS a solid pill rather than as coloured text. */
+  --vsx-v-adaptable:     #92B9DB;
+  --vsx-v-transparent:   #EDF1F5;
+  --vsx-v-collaborative: #F0A0AE;
+  --vsx-v-innovative:    #FFC06B;
+  --vsx-v-accountable:   #FF8578;
+  /* A value HR adds later. Read by valueTone() in lib/value-tone.ts. */
+  --vsx-v-fallback:      #EDF1F5;
+
+  /* ---- Type ---------------------------------------------------------------
+     Barlow Condensed carries titles, set uppercase. Archivo carries
+     everything else. `--vsx-serif` is kept pointing at the UI face so the
+     screens still written against it inherit something sane. */
+  --vsx-display: 'Barlow Condensed', 'Archivo', system-ui, sans-serif;
+  --vsx-sans:    'Archivo', system-ui, -apple-system, sans-serif;
+  --vsx-serif:   var(--vsx-sans);
+
+  /* ---- Motion -------------------------------------------------------------- */
+  --vsx-t:      150ms;
+  --vsx-t-slow: 420ms;
+  --vsx-ease:   cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* ---- Radius -------------------------------------------------------------
+     Large on panels, full on controls. There is no small radius in this
+     system: a 4px corner reads as an accident next to a 22px one. */
+  --vsx-r:      22px;
+  --vsx-r-sm:   14px;
+  --vsx-r-pill: 999px;
+
+  /* ---- The measure of the page -------------------------------------------
+     The content column, its side gutter, and how much clear space the
+     floating rail needs beside it (a 46px mark plus a 20px gap).
+
+     These are tokens rather than numbers typed into each file because the
+     navigation bar, the main column and the fixed furniture all have to
+     agree on them. When they were three separate literals they drifted, and
+     the rail ended up positioned off the left edge of the window. */
+  --vsx-col:     1320px;
+  --vsx-gutter:  clamp(16px, 3vw, 28px);
+  --vsx-dock-w:  66px;
+}
+
+/* =========================================================================
+   THE PAGE
+   Near-flat. The canvas carries a dot lattice and one soft overhead lift,
+   and nothing else — the panels still provide the depth, and the figure
+   against ground this layout is built on still has to win.
+
+   Every layer is deliberately at the edge of visible: the dots sit at 7.5%
+   white on #0B0B0B and the rule lines at 2.2%, which reads as texture in the
+   empty margins and disappears the moment a panel is laid over it. Anything
+   stronger starts competing with the content, which is what kept this
+   surface flat before.
+
+   The two scales are the point. The 26px dots give the surface grain; the
+   208px rules give it a measure, so the eye reads a drawing surface rather
+   than noise. One scale alone does one or the other, not both.
+   ========================================================================= */
+[data-vs-theme='dark'] {
+  background-color: var(--vsx-ink);
+  color: var(--vsx-text);
+  font-family: var(--vsx-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  The theme root establishes a block formatting context.
+
+  Without one, a bottom margin on the last thing inside the portal collapses
+  straight out through every ancestor lacking a bottom padding or border —
+  past <main>, past this element — and lands OUTSIDE the only box painting
+  the dark background. What shows through the gap is the light `body`
+  background from globals.css, as a pale strip across the foot of the page.
+
+  `flow-root` contains it. It costs nothing, changes no layout, and makes
+  the whole class of bug impossible rather than fixing the one instance of
+  it that got noticed.
+*/
+[data-vs-theme='dark'][data-vs-root] {
+  display: flow-root;
+  min-height: 100vh;
+
+  /*
+    Painted as background layers on the canvas itself rather than as a
+    positioned ::before. A pseudo-element would need its own stacking context
+    to stay behind the content, and giving this element `position: relative`
+    to get one would re-anchor every absolutely positioned descendant in the
+    portal. Backgrounds paint behind content by definition and cost nothing.
+
+    Layer 1 is a single overhead wash, sized to one viewport and not repeated,
+    so the top of the page reads as lit and the rest falls away to flat ink.
+    Layer 2 is the lattice, tiled the whole way down.
+  */
+  background-image:
+    radial-gradient(120% 58% at 50% 0%,
+                    rgba(255, 255, 255, 0.055) 0%,
+                    rgba(255, 255, 255, 0) 70%),
+    radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1.7px),
+    linear-gradient(to right,  rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: 100% 620px, 26px 26px, 208px 208px, 208px 208px;
+  background-repeat: no-repeat, repeat, repeat, repeat;
+  background-position: center top, center top, center top, center top;
+}
+
+/*
+  Screens inside the portal that re-declare data-vs-theme do so for the TOKENS,
+  not to repaint the canvas — but the generic rule above hands them an opaque
+  ink background too, and an opaque child sitting on top of the canvas hides
+  the lattice for the whole of that page. The dashboard and the feed both do
+  this, which is most of what an employee looks at.
+
+  The modal backdrop is excluded: its dim is the one case where a descendant
+  painting over the canvas is the entire point.
+*/
+[data-vs-root] [data-vs-theme='dark']:not(.vsx-modal-backdrop) {
+  background-color: transparent;
+}
+
+/* Texture is decoration; at raised contrast it is only noise over the text. */
+@media (prefers-contrast: more) {
+  [data-vs-theme='dark'][data-vs-root] { background-image: none; }
+}
+
+/* =========================================================================
+   TYPE
+   ========================================================================= */
+[data-vs-theme='dark'] h1,
+[data-vs-theme='dark'] h2,
+[data-vs-theme='dark'] h3 {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  color: var(--vsx-text);
+  letter-spacing: 0.005em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+/* The page title: the employee's name, at poster size. */
+.vsx-title {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.002em;
+  line-height: 0.92;
+  color: var(--vsx-text);
+}
+
+/* A panel's label. Small, uppercase, white — the reference point every panel
+   opens from. */
+.vsx-panel-title {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--vsx-text);
+}
+
+/* A headline figure inside a panel. */
+.vsx-fig {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  color: var(--vsx-text);
+}
+
+/* The small print: labels under figures, dates, captions. */
+.vsx-meta {
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--vsx-text-2);
+}
+
+/* A recognition story. */
+.vsx-story {
+  font-family: var(--vsx-sans);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--vsx-text);
+  max-width: 62ch;
+  overflow-wrap: anywhere;
+}
+
+.vsx-heading {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--vsx-text);
+}
+
+/* =========================================================================
+   PANELS
+   The one container in the system. Flat fill, large radius, no border — a
+   single inset highlight along the top edge is what keeps it from
+   disappearing into the page on a dim display.
+   ========================================================================= */
+.vsx-panel {
+  background: var(--vsx-ink-2);
+  border-radius: var(--vsx-r);
+  padding: 22px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--vsx-lift);
+}
+
+.vsx-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  min-height: 24px;
+}
+
+/* An inset region inside a panel — a chart floor, a scrollable list. */
+.vsx-inset {
+  background: var(--vsx-ink);
+  border-radius: var(--vsx-r-sm);
+}
+
+/* =========================================================================
+   CONTROLS
+   Everything pressable is a pill.
+   ========================================================================= */
+.vsx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 18px;
+  border-radius: var(--vsx-r-pill);
+  border: 1px solid transparent;
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--vsx-t) var(--vsx-ease),
+    color var(--vsx-t) var(--vsx-ease),
+    transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-btn:hover  { background: var(--vsx-ink-4); }
+.vsx-btn:active { transform: scale(0.97); }
+.vsx-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+/* The primary action. Lime on black is the loudest thing the palette can
+   make, and it is spent on the one action this product exists for. */
+.vsx-btn-primary {
+  background: var(--vsx-red);
+  color: var(--vsx-on-fill);
+  font-weight: 600;
+}
+
+.vsx-btn-primary:hover { background: var(--vsx-red-hi); }
+
+.vsx-btn-quiet {
+  background: transparent;
+  color: var(--vsx-text-2);
+  padding: 9px 14px;
+}
+
+.vsx-btn-quiet:hover { background: var(--vsx-ink-3); color: var(--vsx-text); }
+
+.vsx-btn-sm { padding: 8px 14px; font-size: 13px; }
+
+/* A circular control. The nav's bell, the rail's value marks, the FAB. */
+.vsx-round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--vsx-r-pill);
+  border: 1px solid transparent;
+  background: var(--vsx-ink-2);
+  color: var(--vsx-text);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    background var(--vsx-t) var(--vsx-ease),
+    color var(--vsx-t) var(--vsx-ease),
+    transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-round:hover  { background: var(--vsx-ink-3); }
+.vsx-round:active { transform: scale(0.94); }
+
+.vsx-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--vsx-r-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--vsx-text-2);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-icon-btn:hover { background: var(--vsx-ink-3); color: var(--vsx-text); }
+
+/* =========================================================================
+   NAVIGATION
+   A row of pills. The current destination is a solid white pill with
+   near-black text — the strongest inversion available, so "where am I" is
+   answered before anything is read.
+   ========================================================================= */
+.vsx-topbar {
+  background: rgba(11, 11, 11, 0.82);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.vsx-navpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-2);
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vsx-text-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--vsx-t) var(--vsx-ease),
+    color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-navpill:hover { background: var(--vsx-ink-3); color: var(--vsx-text); }
+
+.vsx-navpill.is-active {
+  background: var(--vsx-text);
+  color: var(--vsx-on-fill);
+  font-weight: 600;
+}
+
+.vsx-navpill.is-active:hover { background: var(--vsx-text); color: var(--vsx-on-fill); }
+
+/* =========================================================================
+   RESPONSIVE VISIBILITY
+
+   Tailwind's `hidden` / `xl:hidden` live in @layer utilities; this stylesheet
+   is UNLAYERED, and unlayered rules beat layered ones regardless of order —
+   so a component rule like `.vsx-btn { display: inline-flex }` silently
+   defeats `xl:hidden` on any element carrying both. That is what once left a
+   Menu button on screen at desktop width while the sheet it opens was
+   correctly hidden, producing a control that did nothing.
+
+   These are scoped to the theme root, which makes them (0,2,0) — enough to
+   beat any single-class rule in this file, with no !important anywhere.
+   ========================================================================= */
+[data-vs-theme='dark'] .vsx-wide   { display: none; }
+[data-vs-theme='dark'] .vsx-narrow { display: inline-flex; }
+
+@media (min-width: 1180px) {
+  [data-vs-theme='dark'] .vsx-wide   { display: flex; }
+  [data-vs-theme='dark'] .vsx-narrow { display: none; }
+}
+
+/* The rail needs room OUTSIDE the content column, so it appears only where
+   the viewport is wider than the content plus two rails.
+
+   1320 content + 66 for a rail on each side + a 24px margin = 1500. Below
+   that the rail would float on top of the panels, so it is not rendered and
+   the Values panel carries the same filter instead. */
+[data-vs-theme='dark'] .vsx-rail { display: none; }
+
+@media (min-width: 1500px) {
+  [data-vs-theme='dark'] .vsx-rail { display: flex; }
+}
+
+/*
+  Where the fixed furniture sits.
+
+  Docked to the left edge of the content column, so the rail and the
+  floating action sit in the page's own gutter rather than marooned in the
+  far corner of a wide monitor.
+
+  `max()` is the guard, and it is load-bearing. The offset alone —
+  `50% - half the column - the rail` — goes NEGATIVE on any viewport
+  narrower than about 1452px, which put the rail and the button off the
+  left edge of the window with only their right-hand slivers visible. It
+  was previously "safe" only because a display breakpoint in a different
+  rule happened to hide the rail before that point: two numbers that had to
+  agree, in two places, with nothing checking them.
+
+  With the clamp the value can never fall below the page gutter, so the
+  furniture cannot leave the window at ANY width, whatever the breakpoints
+  do — and it stays aligned to the column wherever there is room.
+*/
+.vsx-dock {
+  left: max(
+    var(--vsx-gutter),
+    calc(50% - (var(--vsx-col) / 2) - var(--vsx-dock-w))
+  );
+}
+
+/*
+  The rail only exists at 1500px and up, where the docked offset is
+  comfortably positive. The floating action exists at EVERY width, and
+  below 1500px there is no clear gutter for it — docked at the left it
+  would sit on top of the content, including panel headings. So it moves to
+  the conventional bottom-right until there is room beside the column.
+*/
+.vsx-fab.vsx-dock { left: auto; right: var(--vsx-gutter); }
+
+@media (min-width: 1500px) {
+  .vsx-fab.vsx-dock {
+    left: max(
+      var(--vsx-gutter),
+      calc(50% - (var(--vsx-col) / 2) - var(--vsx-dock-w))
+    );
+    right: auto;
+  }
+}
+
+/* =========================================================================
+   THE PAGE MEASURE
+   The navigation bar and the main column, both from the same tokens the
+   docked furniture uses. Previously these were literals inside two
+   component files, which is how they drifted apart in the first place.
+   ========================================================================= */
+.vsx-measure-bar,
+.vsx-measure-main {
+  max-width: var(--vsx-col);
+  margin: 0 auto;
+}
+
+.vsx-measure-bar  { padding: 0 var(--vsx-gutter); }
+
+/*
+  The bottom value is real padding, not a margin on the last child.
+
+  The colophon used to carry `margin-bottom: 28px` while this had a bottom
+  padding of 0. With no padding or border to stop it, that margin COLLAPSED
+  out through <main> and out through the theme root, and came to rest
+  outside the only element painting the dark background — leaving a 28px
+  strip of the light `body` background across the foot of every page.
+*/
+.vsx-measure-main {
+  padding: clamp(24px, 3vw, 40px) var(--vsx-gutter) clamp(28px, 3.5vw, 44px);
+}
+
+/*
+  A page that ends WITHOUT the colophon still needs room at its foot.
+
+  The floating action button is fixed to the viewport, and below 1500px it
+  sits at the bottom-right, over the content column. The colophon used to
+  absorb that; on a page without one, scrolling to the end would park the
+  button on top of the last entry. 56px button + its 24px offset + 24px of
+  clearance.
+
+  This rule must stay AFTER the shorthand above: same specificity, so source
+  order is what lets the longhand win.
+*/
+.vsx-measure-main-tail { padding-bottom: 104px; }
+
+/* =========================================================================
+   THE DASHBOARD GRID
+
+   Two columns at desktop: everything that summarises on the left, the record
+   on the right. The record is the only panel that grows without bound, so it
+   gets a column of its own — which is what stops one long feed from
+   stretching every other panel on the page to match it.
+   ========================================================================= */
+.vsx-dash-grid,
+.vsx-dash-left {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/*
+   STACKING — why these two rules exist
+
+   `.vsx-settle` animates transform and opacity with `animation-fill-mode:
+   both`. An element with a transform/opacity animation in its fill phase
+   keeps a stacking context permanently, so the page head and EVERY panel
+   each became their own stacking context at `z-index: auto`.
+
+   Once that happens, paint order between them falls back to DOM order — and
+   the record panel comes after the head. It therefore painted over the
+   head's whole subtree, swallowing the open filter menu along with it. The
+   menu's own `z-index: 50` was irrelevant: it only ever competed inside the
+   head's context, never against the panel. Raising it could not have worked.
+
+   The fix is to rank the two contexts against each other. `isolation` on a
+   content grid keeps panel-level stacking contained, so a panel can never
+   climb out over the head either.
+
+   These are deliberately GENERIC rather than per-page. The cause is not the
+   dashboard or the feed — it is that every Panel carries `.vsx-settle`, so
+   ANY screen that puts a menu in its head above a grid of panels has this
+   bug waiting in it. Fixing it one page at a time is how the feed shipped
+   with the same defect the dashboard had just been fixed for. Any page head
+   containing a dropdown takes `.vsx-page-head`; the grid below it takes
+   `isolation: isolate`.
+
+   z-index 20 sits below the sticky navigation (40) so the head still scrolls
+   under the bar, and below the fixed rail (30) and action button (35).
+*/
+.vsx-page-head { position: relative; z-index: 20; }
+
+.vsx-dash-grid,
+.vsx-feed-grid { isolation: isolate; }
+
+@media (min-width: 760px) {
+  .vsx-dash-left { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+  /* The year spans the pair above it: twelve months need the width, and a
+     wide band between two rows of squares is what gives the stack a rhythm
+     rather than a checkerboard. */
+  .vsx-dash-left > :nth-child(3) { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1200px) {
+  .vsx-dash-grid { grid-template-columns: minmax(0, 1fr) minmax(340px, 420px); }
+
+  /*
+    The record hugs its own content instead of stretching to match the
+    column beside it. Stretched, a short record opened a third of a screen
+    of empty panel below its last row — a void inside a filled box, which
+    reads far worse than the page simply ending.
+  */
+  .vsx-dash-grid > :last-child { align-self: start; }
+}
+
+/* =========================================================================
+   THE VALUE RAIL
+   Five circular marks down the left edge, one per Core Value, each filtering
+   the record. Unlabelled by necessity at 46px, so each carries a tooltip and
+   a full aria-label; the Values panel states the same five in words.
+   ========================================================================= */
+.vsx-rail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--vsx-r-pill);
+  border: 1.5px solid var(--tone, var(--vsx-rule-2));
+  background: transparent;
+  color: var(--tone, var(--vsx-text-2));
+  font-family: var(--vsx-display);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  transition:
+    background var(--vsx-t) var(--vsx-ease),
+    color var(--vsx-t) var(--vsx-ease),
+    transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-rail-btn:hover { background: color-mix(in srgb, var(--tone) 18%, transparent); }
+
+.vsx-rail-btn[aria-pressed='true'] {
+  background: var(--tone);
+  color: var(--vsx-on-fill);
+}
+
+.vsx-rail-btn:active { transform: scale(0.92); }
+
+/* A value with nothing recorded against it cannot be filtered to, so it is
+   rendered inert rather than as a button that looks pressable. */
+.vsx-rail-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--vsx-r-pill);
+  border: 1.5px solid var(--vsx-rule);
+  color: var(--vsx-text-3);
+  font-family: var(--vsx-display);
+  font-size: 17px;
+  font-weight: 700;
+  position: relative;
+}
+
+/* The tooltip. Pure CSS off data-label, so there is no JS and no portal. */
+.vsx-rail-btn::after,
+.vsx-rail-mark::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  padding: 7px 12px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text);
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity var(--vsx-t) var(--vsx-ease), transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-rail-btn:hover::after,
+.vsx-rail-btn:focus-visible::after,
+.vsx-rail-mark:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* =========================================================================
+   THE FLOATING ACTION
+   Give recognition. Bottom-left, under the rail, always within reach.
+   ========================================================================= */
+.vsx-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--vsx-r-pill);
+  border: 0;
+  background: var(--vsx-red);
+  color: var(--vsx-on-fill);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(255, 74, 61, 0.18);
+  transition: background var(--vsx-t) var(--vsx-ease), transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-fab:hover  { background: var(--vsx-red-hi); transform: translateY(-2px); }
+.vsx-fab:active { transform: scale(0.94); }
+
+/* =========================================================================
+   PILLS THAT CARRY DATA
+   A recognition in the record, a person in the circle.
+
+   Solid fill in the value's own colour with near-black text: every Core Value
+   hue in this palette is light enough to take it, which is what lets the
+   record read as a band of colour rather than as a list of rows.
+   ========================================================================= */
+.vsx-data-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 15px 6px 6px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--tone, var(--vsx-ink-3));
+  color: var(--vsx-on-fill);
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  min-width: 0;
+  max-width: 100%;
+  transition: transform var(--vsx-t) var(--vsx-ease);
+}
+
+/* A pill in the neutral, un-tinted state — the people list. */
+.vsx-data-pill-quiet {
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text);
+  font-weight: 500;
+}
+
+.vsx-data-pill-quiet .vsx-avatar { background: var(--vsx-ink-4); color: var(--vsx-text-2); }
+
+/* Rows outside an active filter recede rather than unmount, so the shape of
+   the record is preserved and nothing jumps. They return to full strength on
+   hover or keyboard focus — receding is emphasis, never a way to hide
+   content from somebody tabbing through. */
+.vsx-recede { opacity: 0.22; transition: opacity var(--vsx-t-slow) var(--vsx-ease); }
+.vsx-recede:hover,
+.vsx-recede:focus-within { opacity: 1; }
+
+/* =========================================================================
+   FILTER PILLS
+   The row beside the page title. A select is a pill with a chevron; a
+   statement of fact is a pill without one.
+   ========================================================================= */
+.vsx-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: var(--vsx-r-pill);
+  border: 0;
+  background: var(--vsx-ink-2);
+  color: var(--vsx-text);
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-select:hover { background: var(--vsx-ink-3); }
+.vsx-select-label { color: var(--vsx-text-3); }
+
+.vsx-select-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 200px;
+  padding: 7px;
+  border-radius: var(--vsx-r-sm);
+  background: var(--vsx-ink-3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  z-index: 50;
+}
+
+.vsx-select-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--vsx-r-pill);
+  background: transparent;
+  color: var(--vsx-text-2);
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-select-option:hover { background: var(--vsx-ink-4); color: var(--vsx-text); }
+
+.vsx-select-option[aria-selected='true'] {
+  background: var(--vsx-text);
+  color: var(--vsx-on-fill);
+  font-weight: 600;
+}
+
+/* A pill that states something rather than doing something. No hover, no
+   pointer, no chevron — it must not look pressable. */
+.vsx-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: var(--vsx-r-pill);
+  border: 1px solid var(--vsx-rule);
+  color: var(--vsx-text-2);
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* =========================================================================
+   THE YEAR
+   Twelve columns of capsules over a vertical guide, one column per month of
+   the annual period.
+   ========================================================================= */
+.vsx-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+/* The guide the capsules sit on. Dashed, so twelve of them read as a grid
+   rather than as twelve more objects. */
+.vsx-month::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px dashed rgba(255, 255, 255, 0.07);
+}
+
+/*
+  The capsule shares the column's width rather than claiming a fixed 30px.
+  At 30px fixed, twelve columns need 360px of capsule alone, so on a phone
+  they overlapped their neighbours and the year turned into a smear.
+*/
+.vsx-capsule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 30px;
+  min-width: 14px;
+  border-radius: var(--vsx-r-pill);
+  font-family: var(--vsx-display);
+  font-size: clamp(10px, 1.1vw, 13px);
+  font-weight: 700;
+  color: var(--vsx-on-fill);
+  position: relative;
+  z-index: 1;
+  transition: transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-month:hover .vsx-capsule { transform: scale(1.09); }
+
+/* A month with nothing in it. Present, because an empty month is part of the
+   shape of a year, but drawn as an outline so it is never mistaken for one. */
+.vsx-capsule-empty {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--vsx-r-pill);
+  border: 1px solid var(--vsx-rule-2);
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================================
+   THE VALUE MATRIX
+   One row per Core Value; one dot per recognition recorded against it.
+   ========================================================================= */
+.vsx-matrix-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--vsx-r-pill);
+  background: transparent;
+  text-align: left;
+  transition: background var(--vsx-t) var(--vsx-ease);
+}
+
+button.vsx-matrix-row { cursor: pointer; }
+button.vsx-matrix-row:hover { background: var(--vsx-ink-3); }
+button.vsx-matrix-row[aria-pressed='true'] { background: var(--vsx-ink-3); }
+
+.vsx-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--tone, var(--vsx-text-3));
+  flex-shrink: 0;
+}
+
+.vsx-dot-empty {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--vsx-r-pill);
+  border: 1px solid var(--vsx-rule-2);
+  flex-shrink: 0;
+}
+
+/* =========================================================================
+   PROGRESS
+   A pill track with a pill fill. The only measured shape this system draws.
+   ========================================================================= */
+.vsx-track,
+.vsx-measure {
+  position: relative;
+  height: 8px;
+  width: 100%;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  overflow: hidden;
+}
+
+.vsx-track > span,
+.vsx-measure > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-red);
+  transition: width var(--vsx-t-slow) var(--vsx-ease);
+}
+
+/* =========================================================================
+   AVATAR
+   ========================================================================= */
+.vsx-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text-2);
+  font-family: var(--vsx-sans);
+  font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+  user-select: none;
+  position: relative;
+}
+
+.vsx-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/*
+  An avatar sitting inside a solid-coloured pill needs to read against it.
+
+  `:not(.vsx-data-pill-quiet)` is load-bearing. Both this rule and the quiet
+  pill's own avatar rule are (0,2,0), and this one comes later in the file —
+  so without the exclusion it won on source order and painted near-black
+  initials onto the dark grey avatars in the People panel, where the pill is
+  not coloured at all and there is nothing for them to read against.
+*/
+.vsx-data-pill:not(.vsx-data-pill-quiet) .vsx-avatar {
+  background: rgba(11, 11, 11, 0.22);
+  color: var(--vsx-on-fill);
+}
+
+/* =========================================================================
+   THE FEED
+
+   One column, centred. The secondary rail that used to sit beside it has
+   been removed, so the feed is now a single reading column at a comfortable
+   measure rather than a wide column with a gap where the rail was.
+
+   `isolation` is load-bearing, not tidiness: every Panel carries
+   `.vsx-settle`, whose filling transform animation makes it a permanent
+   stacking context, and without an isolating wrapper those contexts paint
+   over the open Sort and Value menus in the head above.
+   ========================================================================= */
+.vsx-feed-page {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.vsx-feed-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  isolation: isolate;
+}
+
+/*
+   THE COMPOSER
+   A field-shaped button, not a text input. It cannot accept text — writing a
+   recognition is a six-step flow with a nominee, a value, a behaviour and a
+   story — so it must not present a caret and then throw the words away.
+   It looks like the start of something because it is: it opens that flow.
+*/
+.vsx-composer-field {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text-3);
+  font-family: var(--vsx-sans);
+  font-size: 14.5px;
+  text-align: left;
+  cursor: pointer;
+  /* The prompt is the first thing to give up room on a phone, where the
+     avatar and the action beside it are both fixed width. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  line-height: 48px;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-composer-field:hover { background: var(--vsx-ink-4); color: var(--vsx-text-2); }
+
+/*
+   A POST
+   The panel, given a feed rhythm. No panel header — a recognition's heading
+   is the story itself, further down, so the top of the post is the two
+   people it is about.
+*/
+.vsx-post { padding: 22px 24px; }
+
+/*
+   The two people, as a pair of faces.
+
+   A recognition is not authored the way a status update is: it always has a
+   giver and a receiver, and showing one avatar would misrepresent it. The
+   ring is the panel's own colour, which is what separates the two without
+   drawing a border around either.
+*/
+.vsx-pair {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.vsx-pair > :last-child {
+  margin-left: -11px;
+  box-shadow: 0 0 0 2.5px var(--vsx-ink-2);
+}
+
+/*
+   The story. The largest thing in the post and the reason the feed exists —
+   what somebody actually did, not a subject line about it.
+*/
+.vsx-post-story {
+  font-family: var(--vsx-sans);
+  font-size: clamp(17px, 1.6vw, 19px);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--vsx-text);
+  max-width: 62ch;
+  overflow-wrap: anywhere;
+}
+
+/* The impact, set against a rule in the value's own colour. */
+.vsx-post-impact {
+  border-left: 2px solid var(--tone, var(--vsx-rule-2));
+  padding-left: 16px;
+  max-width: 62ch;
+}
+
+/*
+   The Core Value, as a badge opposite the names.
+
+   Two earlier versions each got it wrong in a different direction. A small
+   tinted pill in the corner was too quiet — the one thing on a post nobody
+   read. A full-width band above the header was too loud and left the right
+   of the header empty. This sits where the eye already goes after the names,
+   at badge size, and gets its visibility from COLOUR rather than size: the
+   value's mark in a solid disc of its tone, the name in that tone, on a soft
+   wash with a hairline of the same colour.
+
+   The tone arrives on the article as `--tone`. Every pairing holds AA in
+   both modes and both portals: the name clears 4.9:1 on its wash, and the
+   mark's glyph uses the on-fill colour each mode pairs with its fills.
+*/
+.vsx-post-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.vsx-post-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 16px 5px 5px;
+  border-radius: var(--vsx-r-pill);
+  background: color-mix(in srgb, var(--tone, var(--vsx-text)) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone, var(--vsx-text)) 30%, transparent);
+}
+
+.vsx-post-value-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--tone, var(--vsx-text));
+  color: var(--vsx-on-fill);
+}
+
+.vsx-post-value-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.vsx-post-value-label {
+  font-family: var(--vsx-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--vsx-text-2);
+  line-height: 1.1;
+}
+
+.vsx-post-value-name {
+  font-family: var(--vsx-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--tone, var(--vsx-text));
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+/*
+   On a narrow screen the badge drops to its own line under the names.
+
+   Sharing the row squeezed the sentence into three ragged lines, and the
+   sentence is the part of a post that has to be read in a glance.
+*/
+@media (max-width: 680px) {
+  .vsx-post > header { flex-wrap: wrap; }
+  .vsx-post > header > .vsx-post-tags {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 12px;
+    justify-content: space-between;
+  }
+}
+
+/* =========================================================================
+   COMMENTS
+   The conversation, inside the post it belongs to.
+
+   Set QUIETER than the recognition above it. The story is the largest thing
+   on the panel and a thread at the same weight would compete with it; at
+   14px against the story's 17-19px the comments read as remarks ABOUT
+   something rather than as more of the post.
+   ========================================================================= */
+.vsx-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  /* The rule is what separates the conversation from the actions above it.
+     Without it the composer reads as a fourth button in the action row. */
+  border-top: 1px solid var(--vsx-rule);
+}
+
+.vsx-comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* =========================================================================
+   ONE COMMENT
+   Face, then a column: who and when on a line, what they said under it,
+   what you can do about it under that. The overflow control sits out at the
+   right edge where it is found by position rather than by reading.
+   ========================================================================= */
+.vsx-comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.vsx-comment-by {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-width: 0;
+}
+
+.vsx-comment-name {
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vsx-text);
+  overflow-wrap: anywhere;
+}
+
+.vsx-comment-when {
+  font-family: var(--vsx-sans);
+  font-size: 12px;
+  color: var(--vsx-text-3);
+  white-space: nowrap;
+}
+
+.vsx-comment-body {
+  margin: 5px 0 0;
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--vsx-text-2);
+  max-width: 62ch;
+  overflow-wrap: anywhere;
+  /* The composer accepts Shift+Enter, so a comment can hold line breaks.
+     Throwing them away would change what was written. */
+  white-space: pre-wrap;
+}
+
+.vsx-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.vsx-comment-like,
+.vsx-comment-reply {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  padding: 6px 11px;
+  border-radius: var(--vsx-r-pill);
+  background: transparent;
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vsx-text-3);
+  cursor: pointer;
+  transition:
+    background var(--vsx-t) var(--vsx-ease),
+    color var(--vsx-t) var(--vsx-ease),
+    transform var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-comment-like:hover,
+.vsx-comment-reply:hover { background: var(--vsx-ink-3); color: var(--vsx-text); }
+
+.vsx-comment-like:active { transform: scale(0.94); }
+.vsx-comment-like:disabled { opacity: 0.4; pointer-events: none; }
+
+/* Liked. The lime is the product's affirmative and it is already what a
+   recorded appreciation looks like, so the two gestures agree. */
+.vsx-comment-like.is-on { color: var(--vsx-red); background: var(--vsx-red-dim); }
+.vsx-comment-like.is-on:hover { color: var(--vsx-red); background: var(--vsx-red-dim); }
+
+/* =========================================================================
+   REPLIES
+   Indented under their comment and collapsed behind a count, so a long
+   argument under the first remark cannot bury the second.
+   ========================================================================= */
+.vsx-replies {
+  margin-top: 8px;
+  padding-left: 46px;
+}
+
+.vsx-replies-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  padding: 4px 0;
+  background: none;
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vsx-red);
+  cursor: pointer;
+  transition: opacity var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-replies-toggle:hover { opacity: 0.78; }
+
+.vsx-reply-list {
+  gap: 16px;
+  margin-top: 14px;
+  /* One rule down the left, so a run of replies reads as belonging to the
+     comment above rather than as more comments that happen to be indented. */
+  border-left: 1px solid var(--vsx-rule);
+  padding-left: 16px;
+}
+
+.vsx-comment.is-reply .vsx-comment-name { font-size: 13.5px; }
+.vsx-comment.is-reply .vsx-comment-body { font-size: 13.5px; margin-top: 4px; }
+
+/* =========================================================================
+   THE OVERFLOW MENU
+   ========================================================================= */
+.vsx-comment-menu-wrap { position: relative; flex-shrink: 0; }
+
+.vsx-comment-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--vsx-text-3);
+  cursor: pointer;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-comment-menu-btn:hover { background: var(--vsx-ink-3); color: var(--vsx-text); }
+
+.vsx-comment-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  z-index: 5;
+  min-width: 190px;
+  padding: 6px;
+  border-radius: var(--vsx-r-sm);
+  background: var(--vsx-ink-3);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  animation: vsx-sheet-in 120ms var(--vsx-ease) both;
+}
+
+.vsx-comment-menu-item {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 9px 11px;
+  border-radius: calc(var(--vsx-r-sm) - 4px);
+  background: none;
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--vsx-text);
+  cursor: pointer;
+  transition: background var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-comment-menu-item:hover { background: var(--vsx-ink-4); }
+.vsx-comment-menu-item:disabled { opacity: 0.45; pointer-events: none; }
+.vsx-comment-menu-item.is-danger { color: var(--vsx-danger); }
+
+.vsx-comment-menu-note {
+  margin: 2px 11px 5px;
+  font-family: var(--vsx-sans);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--vsx-text-3);
+}
+
+/* =========================================================================
+   THE COMPOSER
+   One pill holding the field and its action, so the two read as a single
+   control rather than as a form. Sits at the TOP of the thread, where a
+   comment box belongs relative to the post it is about — and where a newly
+   posted comment appears, the list below being newest first.
+   ========================================================================= */
+.vsx-comment-composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 12px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  transition: background var(--vsx-t) var(--vsx-ease);
+}
+
+/* Focus is shown by the pill, not by a ring inside it. See TEXT FIELDS
+   under FOCUS for why no text field in this theme wears the lime outline. */
+.vsx-comment-composer:focus-within {
+  background: var(--vsx-ink-4);
+  box-shadow: inset 0 0 0 1px var(--vsx-rule-2);
+}
+
+.vsx-comment-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  resize: none;
+  padding: 7px 0;
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--vsx-text);
+  /* Grown to fit in script, capped here too: past about four lines the
+     composer would start eating the conversation above it. */
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.vsx-comment-input::placeholder { color: var(--vsx-text-3); }
+
+.vsx-comment-count {
+  font-family: var(--vsx-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  color: var(--vsx-text-3);
+  flex-shrink: 0;
+}
+
+.vsx-comment-post {
+  flex-shrink: 0;
+  border: 0;
+  padding: 8px 16px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-red);
+  color: var(--vsx-on-fill);
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--vsx-t) var(--vsx-ease), opacity var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-comment-post:hover:not(:disabled) { background: var(--vsx-red-hi); }
+
+/* Disabled on an empty box, which is its resting state — so it fades rather
+   than disappears, and the way to post stays visible while you type. */
+.vsx-comment-post:disabled { opacity: 0.35; cursor: default; }
+
+.vsx-comment-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--vsx-text-3);
+  cursor: pointer;
+  transition: color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-comment-action:hover { color: var(--vsx-text); }
+
+.vsx-comment-note {
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--vsx-text-3);
+  margin: 0;
+}
+
+.vsx-comment-note.is-error { color: var(--vsx-danger); }
+
+/* "Load more comments". A link in weight, a button in fact, and the last
+   thing in the thread so the conversation ends where it stops. */
+.vsx-load-more {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 8px 14px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vsx-text-2);
+  cursor: pointer;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-load-more:hover { background: var(--vsx-ink-4); color: var(--vsx-text); }
+
+/* A reply box is nested and already indented; it does not need the full
+   composer's breathing room as well. */
+.vsx-comment-composer.is-compact { margin-top: 12px; }
+
+
+/* =========================================================================
+   VALUE COINS
+   An internal token, not money, and styled so it never pretends otherwise:
+   gold is used for the MARK alone. Amounts are set in the same figures as
+   every other number in the product, so a balance reads as a count rather
+   than as a price.
+   ========================================================================= */
+
+/* The balance in the top bar. A pill, like everything pressable. */
+.vsx-coin-chip-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-2);
+  color: var(--vsx-text);
+  text-decoration: none;
+  transition: background var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-coin-chip-nav:hover { background: var(--vsx-ink-3); }
+
+/* =========================================================================
+   SENDING
+   A popover on the post, not a dialog. Sending coins is a small decision and
+   should stay one.
+   ========================================================================= */
+.vsx-coin-pop {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 30;
+  width: min(320px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--vsx-r-sm);
+  background: var(--vsx-ink-3);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  animation: vsx-sheet-in 140ms var(--vsx-ease) both;
+}
+
+/* Above the button rather than below it. The action row sits at the FOOT of
+   a post, so a popover opening downwards would hang over the next
+   recognition in the feed. */
+.vsx-coin-pop-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.vsx-coin-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.vsx-coin-chip {
+  flex: 1;
+  min-width: 56px;
+  border: 0;
+  padding: 9px 0;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-4);
+  font-family: var(--vsx-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vsx-text-2);
+  cursor: pointer;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-coin-chip:hover:not(:disabled) { color: var(--vsx-text); }
+.vsx-coin-chip:disabled { opacity: 0.3; cursor: default; }
+
+.vsx-coin-chip.is-on { background: var(--vsx-red); color: var(--vsx-on-fill); }
+
+/* The exact amount, and the note under it. Both are fields inside a pill so
+   they match the composer in the thread above. */
+.vsx-coin-field {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink);
+  transition: box-shadow var(--vsx-t) var(--vsx-ease);
+}
+
+/* Focus, carried by the pill rather than by a ring inside it. */
+.vsx-coin-field:focus-within {
+  box-shadow: inset 0 0 0 1px var(--vsx-rule-3);
+}
+
+.vsx-coin-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  padding: 11px 0;
+  font-family: var(--vsx-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--vsx-text);
+}
+
+/* The spinners are noise on a field whose common values are one press away. */
+.vsx-coin-field input::-webkit-outer-spin-button,
+.vsx-coin-field input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.vsx-coin-field input[type='number'] { appearance: textfield; }
+
+.vsx-coin-note {
+  border: 0;
+  outline: none;
+  padding: 10px 14px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink);
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  color: var(--vsx-text);
+}
+
+.vsx-coin-note::placeholder { color: var(--vsx-text-3); }
+
+.vsx-coin-note:focus { box-shadow: inset 0 0 0 1px var(--vsx-rule-3); }
+
+.vsx-coin-pop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* =========================================================================
+   THE VALUE WALLET
+   Its own screen. The balance is a hero figure, the month beneath it, then
+   the lifetime totals, the six-month chart and every movement.
+   ========================================================================= */
+.vsx-wallet-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vsx-wallet-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* The two balances, side by side, collapsing to one column on a phone. */
+.vsx-wallet-pair {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/*
+   How much of the budget is left.
+
+   A number alone does not say whether 200 is most of a budget or the end of
+   one, and that is the question the scarcity mechanic is asking the reader.
+   Lime because a remaining budget is capacity, not a warning.
+*/
+.vsx-budget-bar {
+  height: 6px;
+  margin-top: 16px;
+  border-radius: 999px;
+  background: var(--vsx-ink-3);
+  overflow: hidden;
+}
+
+.vsx-budget-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--vsx-red);
+  transition: width var(--vsx-t-slow) var(--vsx-ease);
+}
+
+/* This month, as a sentence rather than a second stat block. It qualifies
+   the balance above it and should read as a caption to it. */
+.vsx-wallet-thismonth {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--vsx-rule);
+}
+
+.vsx-wallet-delta {
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  color: var(--vsx-text-2);
+  margin: 0;
+}
+
+.vsx-wallet-dot { color: var(--vsx-text-3); }
+
+/* Three figures, equal weight, wrapping to one column on a phone. */
+.vsx-wallet-stats {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.vsx-wallet-stat { gap: 12px; }
+
+/* =========================================================================
+   MONTHLY ACTIVITY
+   Grouped columns. Six discrete buckets, two independent flows — not a line
+   (which would assert values between the months) and not a stack (which
+   would hide which direction a tall month went).
+   ========================================================================= */
+.vsx-chart { display: flex; flex-direction: column; gap: 14px; }
+
+.vsx-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Identity is the swatch beside the word, never the word's own colour — a
+   lime label on this panel would be a legibility problem AND would make the
+   text part of the data ink. */
+.vsx-chart-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  color: var(--vsx-text-2);
+}
+
+.vsx-chart-key > i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.vsx-chart-plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.vsx-chart-slot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--vsx-r-sm);
+  /* The hit target is the whole month, not the two thin columns in it. */
+  padding: 4px 2px 0;
+  transition: background var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-chart-slot.is-active { background: var(--vsx-ink-3); }
+
+.vsx-chart-cols {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* The 2px gap is the surface doing the separating. Never a border: a
+     stroke around a mark is ink that is not data. */
+  gap: 2px;
+  width: 100%;
+  flex: 1;
+}
+
+.vsx-chart-col {
+  flex: 1;
+  min-width: 6px;
+  /* Rounded at the data end, square at the baseline, so the column reads as
+     growing FROM the axis rather than floating above it. */
+  border-radius: 4px 4px 0 0;
+  transition: opacity var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-chart-tick {
+  font-family: var(--vsx-sans);
+  font-size: 11.5px;
+  color: var(--vsx-text-3);
+  white-space: nowrap;
+}
+
+.vsx-chart-tip {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: var(--vsx-r-sm);
+  background: var(--vsx-ink-4);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  color: var(--vsx-text-2);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.vsx-chart-tip p { margin: 0; }
+.vsx-chart-tip-month {
+  color: var(--vsx-text);
+  font-weight: 600;
+  margin-bottom: 5px !important;
+}
+
+/* =========================================================================
+   TRANSACTION HISTORY
+   ========================================================================= */
+.vsx-wallet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vsx-wallet-tab {
+  border: 0;
+  padding: 7px 14px;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--vsx-text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--vsx-t) var(--vsx-ease), color var(--vsx-t) var(--vsx-ease);
+}
+
+.vsx-wallet-tab:hover { background: var(--vsx-ink-4); color: var(--vsx-text); }
+.vsx-wallet-tab.is-on { background: var(--vsx-text); color: var(--vsx-on-fill); }
+
+.vsx-wallet-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vsx-wallet-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--vsx-rule);
+}
+
+.vsx-wallet-row:last-child { border-bottom: 0; }
+
+/* Direction, as a shape as well as a colour — an arrow in, an arrow out, a
+   gift for the grant. Somebody who cannot separate lime from orange still
+   reads the row correctly. */
+.vsx-wallet-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.vsx-wallet-icon.is-in  { background: var(--vsx-red-dim); color: var(--vsx-red); }
+.vsx-wallet-icon.is-out { background: var(--vsx-ink-3); color: var(--vsx-text-3); }
+
+.vsx-wallet-who {
+  font-family: var(--vsx-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vsx-text);
+  overflow-wrap: anywhere;
+}
+
+/* The recognition behind the coins — the reason the row is worth reading. */
+.vsx-wallet-context {
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  color: var(--vsx-text-2);
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.vsx-wallet-note {
+  font-family: var(--vsx-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--vsx-text-2);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.vsx-wallet-when {
+  font-family: var(--vsx-sans);
+  font-size: 11.5px;
+  color: var(--vsx-text-3);
+  margin-top: 3px;
+}
+
+/* =========================================================================
+   THE VALUE STORE
+   Where earned coins are spent. The price is the loudest thing on a card —
+   not the name, and certainly not a picture — because what somebody is
+   weighing is what it costs them in recognition they were given.
+   ========================================================================= */
+.vsx-store-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vsx-store-hero {
+  gap: 18px;
+}
+
+/* The balance said as capacity. A number alone does not answer "is that a
+   lot?", which is the question somebody arriving at a store is asking. */
+.vsx-store-reach {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--vsx-rule);
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--vsx-text-2);
+}
+
+.vsx-store-link {
+  color: var(--vsx-red);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.vsx-store-link:hover { text-decoration: underline; }
+
+.vsx-store-grid {
+  display: grid;
+  gap: 18px;
+  /* Three across on a desk, two on a tablet, one on a phone — without a
+     media query per step, because the card has a natural minimum and the
+     grid can be told it. */
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+}
+
+.vsx-store-empty { align-items: flex-start; }
+
+/* =========================================================================
+   A REWARD
+   Two states, and they are different objects: within reach, the card ends in
+   an action; out of reach, it ends in a distance.
+   ========================================================================= */
+.vsx-reward {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 22px;
+  border-radius: var(--vsx-r);
+  background: var(--vsx-ink-2);
+  box-shadow: var(--vsx-lift);
+  transition: opacity var(--vsx-t) var(--vsx-ease);
+}
+
+/*
+   Out of reach.
+
+   Recessed rather than disabled. The card is still readable — it is a thing
+   to work towards, not an error — so this is a step back in contrast, not a
+   grey-out.
+*/
+.vsx-reward.is-locked { background: var(--vsx-ink); }
+.vsx-reward.is-locked .vsx-reward-name { color: var(--vsx-text-2); }
+.vsx-reward.is-locked .vsx-reward-price .vsx-fig { color: var(--vsx-text-2); }
+
+/* The shelf, not the reward. One mark repeated across a category rather than
+   an illustration per item. */
+.vsx-reward-shelf {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--vsx-sans);
+  font-size: 12px;
+  color: var(--vsx-text-3);
+  margin: 0;
+}
+
+.vsx-reward-name {
+  font-family: var(--vsx-display);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--vsx-text);
+  margin-top: 14px;
+  overflow-wrap: anywhere;
+}
+
+.vsx-reward-desc {
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--vsx-text-2);
+  margin-top: 8px;
+  /* Comfortable for two or three lines; past that the card is being asked to
+     hold a paragraph it was not built for. */
+  max-width: 42ch;
+}
+
+.vsx-reward-note {
+  font-family: var(--vsx-sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--vsx-text-3);
+  margin-top: 8px;
+}
+
+/* Pushed to the bottom so cards of different description lengths still line
+   their prices up across a row. */
+.vsx-reward-foot { margin-top: auto; padding-top: 18px; }
+
+.vsx-reward-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+}
+
+.vsx-reward-action { margin-top: 14px; align-self: flex-start; }
+
+.vsx-reward-progress { margin-top: 14px; }
+
+/* How far along, at a glance. Lime because it is progress toward something,
+   not a warning about a shortfall. */
+.vsx-reward-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--vsx-ink-3);
+  overflow: hidden;
+}
+
+.vsx-reward-track > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--vsx-red);
+  transition: width var(--vsx-t-slow) var(--vsx-ease);
+}
+
+/* =========================================================================
+   CONFIRMING A REDEMPTION
+   ========================================================================= */
+[data-vs-theme='dark'].vsx-modal-backdrop,
+.vsx-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.66);
+  backdrop-filter: blur(3px);
+  animation: vsx-fade-in 140ms var(--vsx-ease) both;
+}
+
+@keyframes vsx-fade-in {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+.vsx-redeem {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border-radius: var(--vsx-r);
+  background: var(--vsx-ink-2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 24px 60px rgba(0, 0, 0, 0.55);
+  /* The one piece of non-user-triggered motion on this screen, and it is
+     answering a press. */
+  animation: vsx-settle 200ms var(--vsx-ease) both;
+}
+
+.vsx-redeem-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vsx-redeem-said {
+  font-family: var(--vsx-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--vsx-text);
+  margin: 0;
+}
+
+/* The arithmetic, done for the reader. Three rows, the last one ruled off,
+   because the number that matters is what is left afterwards. */
+.vsx-redeem-sums {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.vsx-redeem-sums > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+}
+
+.vsx-redeem-sums dt {
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  color: var(--vsx-text-2);
+}
+
+.vsx-redeem-sums dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font-family: var(--vsx-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vsx-text);
+}
+
+.vsx-redeem-sums .is-total {
+  border-top: 1px solid var(--vsx-rule);
+  margin-top: 4px;
+  padding-top: 13px;
+}
+
+.vsx-redeem-sums .is-total dd { color: var(--vsx-red); }
+
+.vsx-redeem-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+@media (max-width: 480px) {
+  .vsx-redeem-foot > .vsx-btn { flex: 1; }
+}
+
+
+/* A 46px indent inside a phone-width card leaves a reply about thirty
+   characters of line. The rule down the left still says what it is. */
+@media (max-width: 620px) {
+  .vsx-replies { padding-left: 18px; }
+  .vsx-reply-list { padding-left: 12px; }
+}
+
+
+/* =========================================================================
+   FOCUS
+   ========================================================================= */
+[data-vs-theme='dark'] *:focus-visible {
+  outline: 2px solid var(--vsx-red);
+  outline-offset: 3px;
+  border-radius: var(--vsx-r-pill);
+}
+
+/*
+   TEXT FIELDS ARE THE EXCEPTION, AND ALWAYS WILL BE.
+
+   The rule above draws a lime pill AROUND whatever has focus. On a button
+   that is right: the outline traces a shape that is already a pill, and the
+   colour says "this is where you are". On a text field it is wrong, and
+   wrong in a way that gets worse the better the field looks — every field in
+   this theme sits inside a pill-shaped container, so the outline lands as a
+   second, brighter pill drawn just inside the first. It reads as an error
+   state on a box somebody is simply typing in.
+
+   So no <input>, <textarea> or <select> takes it. This is a standing rule of
+   the system, not a patch on the fields that exist today: a field added next
+   month is covered by these three selectors without anybody remembering to
+   cover it.
+
+   FOCUS IS STILL VISIBLE, and has to be — removing an indicator without
+   replacing it fails keyboard users. Each field's CONTAINER carries it
+   instead, via :focus-within: the pill lifts to the pressed surface and takes
+   a hairline. `.vsx-comment-composer` and `.vsx-coin-field` do this, and any
+   new field should do the same rather than reinstate the outline.
+
+   Specificity: the rule above is `[data-vs-theme='dark'] *:focus-visible`,
+   which is 0-2-0. These are 0-2-1 — attribute, pseudo-class and an element
+   name — so they win on specificity rather than on sitting further down the
+   file, which is not a thing to rely on.
+*/
+[data-vs-theme='dark'] input:focus,
+[data-vs-theme='dark'] input:focus-visible,
+[data-vs-theme='dark'] textarea:focus,
+[data-vs-theme='dark'] textarea:focus-visible,
+[data-vs-theme='dark'] select:focus,
+[data-vs-theme='dark'] select:focus-visible {
+  outline: none;
+}
+
+/* =========================================================================
+   SCROLLBAR
+   ========================================================================= */
+[data-vs-theme='dark'] ::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-vs-theme='dark'] ::-webkit-scrollbar-track { background: transparent; }
+[data-vs-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: var(--vsx-r-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* =========================================================================
+   LOADING
+   ========================================================================= */
+.vsx-skeleton {
+  background: var(--vsx-ink-2);
+  border-radius: var(--vsx-r-sm);
+  animation: vsx-breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes vsx-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+/* =========================================================================
+   MOTION
+   Panels settle in once, in sequence, on load. Nothing else moves unless it
+   is answering an action.
+   ========================================================================= */
+@keyframes vsx-settle {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.vsx-settle { animation: vsx-settle var(--vsx-t-slow) var(--vsx-ease) both; }
+
+@keyframes vsx-sheet-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.vsx-sheet-in { animation: vsx-sheet-in var(--vsx-t) var(--vsx-ease) both; }
+
+@keyframes vsx-spin { to { transform: rotate(360deg); } }
+.vsx-spin { animation: vsx-spin 900ms linear infinite; }
+
+/* =========================================================================
+   VALUE COIN MOTION
+   ============================================================================
+
+   One gesture, reused at every scale: a delta chip rises and fades while the
+   figure beneath it settles and briefly warms to the direction colour. The
+   toast, the wallet hero, the navigation chip and the redeem dialog are the
+   same three moves at different sizes — not four animations that happen to
+   involve coins.
+
+   Colour carries direction, as it does everywhere else in this system: lime
+   for coins arriving, orange for coins going out. No new hue is introduced,
+   and gold stays reserved for the coin MARK alone so an amount never reads
+   as money.
+
+   Nothing here loops, bounces or springs. Every animation runs once, ends in
+   a resting state, and is over inside half a second.
+   ========================================================================= */
+
+[data-vs-theme='dark'] {
+  /* Mirrored in COIN_MOTION in lib/value-coins.ts — a JavaScript timer and a
+     CSS animation have to agree on how long a thing lasts. */
+  --vsx-coin-micro: 160ms;   /* a chip appearing */
+  --vsx-coin-move:  240ms;   /* a toast arriving or leaving */
+  --vsx-coin-event: 440ms;   /* a figure settling, a glow decaying */
+  --vsx-coin-hold: 1100ms;   /* how long a changed balance stays lit */
+  /* The chip's whole life: rise, hold, fade. Matches the pulse timer. */
+  --vsx-coin-chip-life: 1540ms;
+}
+
+/* ── The figure, and the chip that reports its change ─────────────────── */
+
+/*
+  `fit-content`, not a full-width block.
+
+  The chip is positioned at `left: 100%` of this box, so a figure stretched
+  to its container's width would fling it to the far edge of the panel,
+  nowhere near the number it is reporting on. Shrinking the box to its digits
+  is what keeps the chip beside them at every size.
+*/
+.vsx-coin-figure {
+  position: relative;
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: baseline;
+}
+
+/* Warms to the direction colour, then cools back. A transition rather than a
+   keyframe, so the return is as controlled as the arrival and removing the
+   attribute is all it takes to end it. */
+.vsx-coin-figure .vsx-fig {
+  transition: color var(--vsx-coin-event) var(--vsx-ease);
+}
+
+.vsx-coin-figure[data-lit='in']  .vsx-fig { color: var(--vsx-red); }
+.vsx-coin-figure[data-lit='out'] .vsx-fig { color: var(--vsx-silver); }
+
+.vsx-coin-delta {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: var(--vsx-r-pill);
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.vsx-coin-delta.is-lg { font-size: 19px; padding: 6px 12px; }
+
+.vsx-coin-delta[data-flow='in']  { background: var(--vsx-red-dim);   color: var(--vsx-red); }
+.vsx-coin-delta[data-flow='out'] { background: var(--vsx-silver-dim); color: var(--vsx-silver); }
+
+/*
+  POSITION IS DECIDED BY CONTEXT, NOT BY SIZE.
+
+  A chip inside a figure floats clear of it, so a balance never reflows while
+  it is changing — a number that shifts sideways as it counts is the jitter
+  this whole system is trying not to have. A chip anywhere else is ordinary
+  inline content and sits in the flow.
+*/
+.vsx-coin-figure > .vsx-coin-delta {
+  position: absolute;
+  left: 100%;
+  bottom: 100%;
+  margin-left: 10px;
+  animation: vsx-coin-rise var(--vsx-coin-chip-life) var(--vsx-ease) both;
+}
+
+/*
+  Rise, hold, fade — as one animation rather than three chained ones.
+
+  The percentages are the hold: visible from 12% to 70% of its life, which is
+  most of it. A chip that fades the moment it is legible is a flicker, and a
+  chip that lingers after the figure has settled is clutter.
+*/
+@keyframes vsx-coin-rise {
+  0%   { opacity: 0; transform: translateY(5px); }
+  12%  { opacity: 1; transform: none; }
+  70%  { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-7px); }
+}
+
+/*
+  In the navigation bar the chip drops instead of rising.
+
+  The bar is stuck to the top of the window, so a chip floating above the
+  balance would be clipped by the edge of the screen — and dropping it
+  towards the page reads correctly anyway: this is the giving balance, and
+  what leaves it goes out into the product.
+*/
+.vsx-coin-chip-nav .vsx-coin-figure > .vsx-coin-delta {
+  left: auto;
+  right: 0;
+  bottom: auto;
+  top: calc(100% + 12px);
+  margin-left: 0;
+  animation-name: vsx-coin-drop;
+}
+
+@keyframes vsx-coin-drop {
+  0%   { opacity: 0; transform: translateY(-5px); }
+  12%  { opacity: 1; transform: none; }
+  70%  { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(7px); }
+}
+
+/* ── A surface that briefly acknowledges a change ─────────────────────── */
+
+/*
+  Heat, not a flash.
+
+  A flash is a game telling you that you scored. A glow that decays reads as
+  something having just happened here, which is what it is. Applied with a
+  transition so it warms on and cools off under the same easing as
+  everything else.
+*/
+.vsx-coin-lit { position: relative; }
+
+.vsx-coin-lit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--vsx-coin-event) var(--vsx-ease);
+}
+
+.vsx-coin-lit[data-lit='in']::after {
+  box-shadow: inset 0 0 0 1px var(--vsx-red), 0 0 34px -12px var(--vsx-red);
+  opacity: 0.5;
+}
+
+.vsx-coin-lit[data-lit='out']::after {
+  box-shadow: inset 0 0 0 1px var(--vsx-silver), 0 0 34px -12px var(--vsx-silver);
+  opacity: 0.5;
+}
+
+/* ── The coins one recognition earned ─────────────────────────────────── */
+
+/*
+  Muted, unpilled and unpressable, so it reads as a fact about the post
+  rather than as a score on it. Recognition is the point of the feed; this is
+  the receipt attached to it.
+*/
+.vsx-post-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  color: var(--vsx-text-3);
+}
+
+.vsx-post-coins .vsx-fig { color: var(--vsx-text-2); }
+
+/* ── The toast ────────────────────────────────────────────────────────── */
+
+/*
+  Bottom-RIGHT, because Give recognition is fixed in the opposite corner and
+  the one action this product exists for does not get covered by a receipt
+  for it.
+*/
+.vsx-coin-toast-host {
+  position: fixed;
+  right: var(--vsx-gutter);
+  bottom: 24px;
+  /* Above the modal layer (120). A dialog is a decision somebody is in the
+     middle of; coins arriving during it is still theirs to know about, and
+     the alternative is losing it behind a backdrop. */
+  z-index: 130;
+  width: min(352px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.vsx-coin-toast {
+  position: relative;
+  pointer-events: auto;
+  padding: 15px 15px 15px 16px;
+  border-radius: var(--vsx-r-sm);
+  background: var(--vsx-ink-2);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  animation: vsx-coin-toast-in var(--vsx-coin-move) var(--vsx-ease) both;
+}
+
+.vsx-coin-toast.is-leaving {
+  animation: vsx-coin-toast-out var(--vsx-coin-move) var(--vsx-ease) both;
+}
+
+@keyframes vsx-coin-toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes vsx-coin-toast-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(8px); }
+}
+
+/* The glow that says this one is fresh. Decorative, and the only thing here
+   that is — it carries nothing the words do not. */
+.vsx-coin-toast::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: vsx-coin-glow 900ms var(--vsx-ease) both;
+}
+
+.vsx-coin-toast[data-flow='in']::before {
+  box-shadow: inset 0 0 0 1px var(--vsx-red), 0 0 38px -14px var(--vsx-red);
+}
+
+.vsx-coin-toast[data-flow='out']::before {
+  box-shadow: inset 0 0 0 1px var(--vsx-silver), 0 0 38px -14px var(--vsx-silver);
+}
+
+/* A first-time or milestone moment is given a longer decay — the extra
+   second is the entire difference in treatment, and it is enough. */
+.vsx-coin-toast[data-moment]::before { animation-duration: 1700ms; }
+
+@keyframes vsx-coin-glow {
+  from { opacity: 0.55; }
+  to   { opacity: 0; }
+}
+
+.vsx-coin-toast-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.vsx-coin-toast-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--vsx-r-pill);
+  background: var(--vsx-ink-3);
+}
+
+.vsx-coin-toast-sum {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-bottom: 7px;
+}
+
+.vsx-coin-toast-unit {
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  color: var(--vsx-text-3);
+}
+
+.vsx-coin-toast-title {
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--vsx-text);
+}
+
+.vsx-coin-toast-detail {
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin-top: 3px;
+  color: var(--vsx-text-3);
+}
+
+.vsx-coin-toast-close {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  margin: -4px -4px 0 0;
+}
+
+/* The moment line. Condensed uppercase because that is what a label is in
+   this system, not because a celebration needs shouting. */
+.vsx-coin-moment {
+  font-family: var(--vsx-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.085em;
+  font-size: 11.5px;
+  line-height: 1;
+  margin-bottom: 12px;
+  color: var(--vsx-red);
+}
+
+/* ── The redemption receipt, inside the dialog ────────────────────────── */
+
+.vsx-redeem-receipt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: var(--vsx-r-sm);
+  background: var(--vsx-ink-3);
+  animation: vsx-coin-toast-in var(--vsx-coin-move) var(--vsx-ease) both;
+}
+
+.vsx-redeem-receipt-what {
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  color: var(--vsx-text);
+}
+
+.vsx-redeem-receipt-sub {
+  font-family: var(--vsx-sans);
+  font-size: 12.5px;
+  margin-top: 3px;
+  color: var(--vsx-text-3);
+}
+
+/* =========================================================================
+   REDUCED MOTION
+   Durations collapse; nothing is cancelled. The settle animations run `both`
+   from opacity 0, so `animation: none` would leave content invisible forever.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  [data-vs-theme='dark'] *,
+  [data-vs-theme='dark'] *::before,
+  [data-vs-theme='dark'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-vs-theme='dark'] .vsx-skeleton { animation: none !important; }
+  [data-vs-theme='dark'] .vsx-spin     { animation: none !important; }
+
+  /*
+    VALUE COINS WITHOUT MOTION
+
+    The rule collapsing durations above is right for a transition and wrong
+    for the delta chip, whose animation ENDS at opacity 0 — collapsed, it
+    would arrive already faded and the figure would never be seen at all.
+    So the chip stops animating and simply sits there, legible, until the
+    same timer that would have faded it removes it from the DOM.
+
+    Everything else about a coin movement survives untouched: the figure
+    still lands on the new balance, the toast still states what happened in
+    words, and the changed balance is still tinted. What is removed is the
+    travelling — the rise, the slide, the decaying glow — which carried no
+    information in the first place.
+  */
+  [data-vs-theme='dark'] .vsx-coin-figure > .vsx-coin-delta {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Purely decorative, and the one thing here safe to drop outright. */
+  [data-vs-theme='dark'] .vsx-coin-toast::before { display: none; }
+}
+
+
+/* =========================================================================
+   MY REDEMPTIONS
+   The other half of the Value Store: what has already left the shelves.
+   Shares .vsx-reward for the card body, because a redeemed reward and one
+   still on offer are the same object at two moments and should not look like
+   two different products.
+   ========================================================================= */
+
+/* ── The two views ─────────────────────────────────────────
+   A segmented control, not the pill row the category shelves use. Those sort
+   one list; this switches between two screens, and giving them the same
+   shape would say they were the same kind of choice. */
+.vsx-store-views {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--vsx-ink-2);
+  align-self: flex-start;
+}
+
+.vsx-store-view {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--vsx-text-2);
+  font-family: var(--vsx-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 140ms var(--vsx-ease), color 140ms var(--vsx-ease);
+}
+
+.vsx-store-view:hover { color: var(--vsx-text); }
+
+.vsx-store-view.is-on {
+  background: var(--vsx-red);
+  color: var(--vsx-on-fill);
+}
+
+/* ── The card ──────────────────────────────────────────────
+   An expired one recedes rather than being struck through: the record is
+   still worth reading, it is only no longer actionable. Same reasoning as
+   .vsx-reward.is-locked, which is the other card on this screen that is
+   present but cannot be acted on. */
+.vsx-redemption-card.is-spent { background: var(--vsx-ink); }
+.vsx-redemption-card.is-spent .vsx-reward-name { color: var(--vsx-text-2); }
+.vsx-redemption-card.is-spent .vsx-reward-price .vsx-fig { color: var(--vsx-text-2); }
+
+.vsx-redemption-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vsx-redemption-status > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.vsx-redemption-lines { margin-top: 10px; }
+
+.vsx-redemption-line {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--vsx-text);
+}
+
+.vsx-redemption-line.is-muted { color: var(--vsx-text-3); }
+.vsx-redemption-line.is-good  { color: var(--vsx-red); }
+
+.vsx-redemption-reason-inline {
+  margin-top: 10px;
+  font-style: italic;
+  color: var(--vsx-text-2);
+}
+
+/* ── The detail sheet ──────────────────────────────────────
+   Scrolls inside itself rather than growing past the viewport: the timeline
+   on a rejected request with a long reason is taller than a phone. */
+.vsx-redemption-sheet {
+  width: min(520px, 100%);
+  max-height: min(88vh, 860px);
+  display: flex;
+  flex-direction: column;
+  background: var(--vsx-ink-2);
+  border-radius: var(--vsx-r);
+  overflow: hidden;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.66);
+  animation: vsx-fade-in 160ms var(--vsx-ease) both;
+}
+
+.vsx-redemption-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid var(--vsx-rule);
+}
+
+.vsx-redemption-title {
+  font-family: var(--vsx-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: 0.005em;
+  color: var(--vsx-text);
+  margin-top: 6px;
+}
+
+.vsx-redemption-body {
+  padding: 20px 22px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.vsx-redemption-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.vsx-redemption-price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vsx-redemption-topline .vsx-redemption-status { margin-top: 0; }
+
+.vsx-redemption-facts {
+  display: grid;
+  gap: 12px;
+}
+
+.vsx-redemption-facts > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vsx-redemption-facts dt {
+  font-size: 12.5px;
+  color: var(--vsx-text-3);
+  flex-shrink: 0;
+}
+
+.vsx-redemption-facts dd {
+  font-size: 13.5px;
+  color: var(--vsx-text);
+  text-align: right;
+}
+
+.vsx-redemption-left { color: var(--vsx-text-2); }
+
+.vsx-redemption-reason {
+  border-left: 2px solid var(--vsx-rule-2);
+  padding: 2px 0 2px 14px;
+}
+
+.vsx-redemption-reason p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--vsx-text);
+}
+
+.vsx-redemption-reason cite {
+  display: block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vsx-text-3);
+}
+
+.vsx-redemption-subhead {
+  font-family: var(--vsx-sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vsx-text-3);
+  margin-bottom: 14px;
+}
+
+/* ── The timeline ──────────────────────────────────────────
+   The connecting rule is drawn on the MARK, not between the rows, so it
+   cannot drift out of alignment when a step gains a second line of text. */
+.vsx-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vsx-timeline-step {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.vsx-timeline-step:last-child { padding-bottom: 0; }
+
+.vsx-timeline-step::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 1px;
+  background: var(--vsx-rule);
+}
+
+.vsx-timeline-step:last-child::before { display: none; }
+
+.vsx-timeline-mark {
+  width: 23px;
+  height: 23px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--vsx-ink-3);
+  color: var(--vsx-text-3);
+  z-index: 1;
+}
+
+.vsx-timeline-step.is-done .vsx-timeline-mark {
+  background: var(--vsx-red);
+  color: var(--vsx-on-fill);
+}
+
+.vsx-timeline-step.is-current .vsx-timeline-mark {
+  background: var(--vsx-silver-dim);
+  color: var(--vsx-silver);
+  box-shadow: inset 0 0 0 1px var(--vsx-silver);
+}
+
+.vsx-timeline-step.is-failed .vsx-timeline-mark {
+  background: var(--vsx-danger);
+  color: var(--vsx-on-fill);
+}
+
+.vsx-timeline-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vsx-text);
+  line-height: 1.35;
+}
+
+.vsx-timeline-step.is-todo .vsx-timeline-label { color: var(--vsx-text-3); }
+
+.vsx-timeline-when,
+.vsx-timeline-note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--vsx-text-3);
+  margin-top: 2px;
+}
+
+.vsx-timeline-note { color: var(--vsx-text-2); }
+
+/* ── Where the coins went ──────────────────────────────────
+   Set apart in its own block because it answers a different question from
+   everything above it, and because on an expiry it is the ONE thing the
+   employee is owed an unambiguous sentence about. */
+.vsx-redemption-coins {
+  background: var(--vsx-ink-3);
+  border-radius: var(--vsx-r-sm);
+  padding: 16px 18px;
+}
+
+.vsx-redemption-coins-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--vsx-text);
+}
+
+.vsx-redemption-coins-detail {
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--vsx-text-2);
+}
+
+@media (max-width: 560px) {
+  .vsx-store-views { width: 100%; }
+  .vsx-store-view { flex: 1; text-align: center; padding: 9px 12px; }
+  .vsx-redemption-facts > div { flex-direction: column; gap: 2px; align-items: flex-start; }
+  .vsx-redemption-facts dd { text-align: left; }
+}

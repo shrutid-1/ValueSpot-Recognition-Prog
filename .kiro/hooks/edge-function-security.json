@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Edge Function Security Check",
+      "trigger": "PostFileSave",
+      "description": "Security check on Edge Functions to ensure service role key safety and JWT validation",
+      "matcher": "supabase/functions/.*\\.ts$",
+      "action": {
+        "type": "agent",
+        "prompt": "A Supabase Edge Function file was just saved. Please verify:\n1. The function validates the Authorization header and JWT before processing any request\n2. The function checks the caller's role from JWT claims before performing privileged operations\n3. SUPABASE_SERVICE_ROLE_KEY is only used via Deno.env.get() (not hardcoded)\n4. The function returns 401 for missing/invalid auth and 403 for insufficient permissions\n5. Input parameters are validated before use\n6. Sensitive error details are not returned to clients\nReport any security issues found."
+      }
+    }
+  ]
+}
